@@ -23,7 +23,7 @@ class CodeMirrorSubset {
     }
 
     getCode(pos: any): string {
-        return this.cm.getRange(pos, {'line': this.cm.lineCount() + 1, 'ch' : 0}, '\n');
+        return this.cm.getRange(pos, { 'line': this.cm.lineCount() + 1, 'ch': 0 }, '\n');
     }
 
     getValue(): string {
@@ -52,9 +52,9 @@ class IncrementalInterpretationHelper {
     afterExtraCode: string | undefined; // Code to be executed after any user code
 
     constructor(outputCallback: (code: string, complete: boolean) => any,
-                settings: string | null,
-                initialCode: string | undefined = undefined,
-                afterCode: string | undefined = undefined) {
+        settings: string | null,
+        initialCode: string | undefined = undefined,
+        afterCode: string | undefined = undefined) {
         this.interpreterSettings = settings;
         this.disabled = false;
         this.outputCallback = outputCallback;
@@ -98,7 +98,9 @@ class IncrementalInterpretationHelper {
                 delete this.markers[id];
             }
         } else if (message.type === 'partial') {
-            this.partialOutput += message.data;
+            // this.partialOutput += message.data;
+            // this.partialOutput = "\\1> Hello";
+            console.log("Partial output", this.partialOutput);
             this.outputCallback(this.partialOutput, false);
             this.startTimeout();
         } else if (message.type === 'ping' || message.type === 'finished') {
@@ -133,10 +135,37 @@ class IncrementalInterpretationHelper {
             return;
         }
         this.codemirror = codemirror;
+
+
+        let code = codemirror.getValue().trim();
+        const endTag = ";;";
+        const parts = code.split(endTag).filter((x: string) => x !== '');
+        this.partialOutput = '';
+        let parity = true;
+        for (const part of parts) {
+            let response = "";
+            try {
+                // @ts-ignore
+                response = evaluator.execute(part + endTag);
+            } catch (e) {
+                // TODO: try to catch errors from the evaluator
+            }
+            this.partialOutput += "\\" + (parity ? "1" : "2") + "> " + response;
+            this.outputCallback(this.partialOutput, false);
+            parity = !parity;
+        }
+        this.outputCallback(this.partialOutput, true);
+        this.partialOutput = '';
+        if (this.workerTimeout !== null) {
+            clearTimeout(this.workerTimeout);
+            this.workerTimeout = null;
+        }
+        return;
+
         if (this.wasTerminated) { // Re-evaluate everything
             added = codemirror.getValue().split('\n');
             removed = [];
-            pos = {line: 0, ch: 0};
+            pos = { line: 0, ch: 0 };
             this.wasTerminated = false;
             this.worker.postMessage({
                 type: 'settings',
@@ -247,14 +276,14 @@ class CodeMirrorWrapper extends React.Component<Props, State> {
 
         if (this.props.interpreterSettings !== undefined) {
             this.evalHelper = new IncrementalInterpretationHelper(this.props.outputCallback,
-                                                JSON.stringify(this.props.interpreterSettings),
-                                                this.props.beforeCode,
-                                                this.props.afterCode);
+                JSON.stringify(this.props.interpreterSettings),
+                this.props.beforeCode,
+                this.props.afterCode);
         } else {
             this.evalHelper = new IncrementalInterpretationHelper(this.props.outputCallback,
-                                                localStorage.getItem('interpreterSettings'),
-                                                this.props.beforeCode,
-                                                this.props.afterCode);
+                localStorage.getItem('interpreterSettings'),
+                this.props.beforeCode,
+                this.props.afterCode);
         }
 
         this.handleChangeEvent = this.handleChangeEvent.bind(this);
@@ -294,7 +323,7 @@ class CodeMirrorWrapper extends React.Component<Props, State> {
         return (
             <div className={editorClassName}>
                 <textarea
-                    ref={(editor: any) => {this.editor = editor; }}
+                    ref={(editor: any) => { this.editor = editor; }}
                     defaultValue={value}
                     autoComplete="off"
                 />
@@ -337,11 +366,11 @@ class CodeMirrorWrapper extends React.Component<Props, State> {
                 'CodeMirror-linenumbers', 'CodeMirror-foldgutter'
             ],
             specialChars: new RegExp('[\u0000-\u001f\u007f-\u009f\u00a0\u00ad'
-                                     + '\u061c\u1680\u2000-\u200f\u2028\u2029\u202f'
-                                     + '\u205f\u3000\ufeff\ufff9-\ufffc]'),
+                + '\u061c\u1680\u2000-\u200f\u2028\u2029\u202f'
+                + '\u205f\u3000\ufeff\ufff9-\ufffc]'),
             specialCharPlaceholder: ((ch: any) => {
                 let token = elt('span', ch.charCodeAt(0).toString(16).toUpperCase(),
-                                'cm-label');
+                    'cm-label');
                 return token;
             }),
             extraKeys: {
@@ -370,8 +399,8 @@ class CodeMirrorWrapper extends React.Component<Props, State> {
         this.codeMirrorInstance.on('blur', this.focusChanged.bind(this, false));
 
         this.evalHelper.clear();
-        this.evalHelper.handleChangeAt({line: 0, ch: 0, sticky: null}, [''], [''],
-                                       new CodeMirrorSubset(this.codeMirrorInstance));
+        this.evalHelper.handleChangeAt({ line: 0, ch: 0, sticky: null }, [''], [''],
+            new CodeMirrorSubset(this.codeMirrorInstance));
     }
 
     componentWillUnmount() {
