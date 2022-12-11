@@ -6,8 +6,6 @@ There are multiple ways to do this:
 - [ ] Extension:
   * Write a OCaml -> SML transpiler for parsing
   * Write a postprocessor for the SML output
-- [ ] The clean way: 
-  * 
 * A new interpreter
   * Use an OCaml interpreter instead of the SML interpreter
   * We are closer to the OCaml semantics 
