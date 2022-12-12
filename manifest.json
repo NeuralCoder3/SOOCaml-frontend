@@ -1,0 +1,23 @@
+{
+    "name": "SOSML",
+    "short_name": "SOSML",
+    "description": "SOSML: The Online Interpreter for Standard ML (SML)",
+    "start_url": "/editor",
+    "background_color": "#000000",
+    "theme_color": "#000000",
+    "display": "fullscreen",
+    "icons": [{
+        "src": "icon256.png",
+        "sizes": "256x256",
+        "type": "image/png"
+    }, {
+        "src": "icon512.png",
+        "sizes": "512x512",
+        "type": "image/png"
+    }, {
+        "src": "maskable_icon.png",
+        "sizes": "640x640",
+        "purpose": "maskable",
+        "type": "image/png"
+    }]
+}
