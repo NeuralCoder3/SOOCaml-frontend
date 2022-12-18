@@ -146,10 +146,15 @@ class IncrementalInterpretationHelper {
             let response = "";
             try {
                 // @ts-ignore
-                response = evaluator.execute(part + endTag);
+                // response = evaluator.execute(part + endTag);
+                response = execute(part + endTag);
             } catch (e) {
                 // TODO: try to catch errors from the evaluator
+                // console.log("caught error", e);
+                response = "" + e;
             }
+            if (!response.endsWith("\n"))
+                response += "\n";
             this.partialOutput += "\\" + (parity ? "1" : "2") + "> " + response;
             this.outputCallback(this.partialOutput, false);
             parity = !parity;
