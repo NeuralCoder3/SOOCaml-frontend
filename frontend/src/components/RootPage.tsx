@@ -20,7 +20,7 @@ class RootPage extends React.Component<any, any> {
     render() {
         let settings = getInterfaceSettings();
         let theme = renderTheme(getTheme(settings.theme, settings.autoSelectTheme ?
-                                         settings.darkTheme : undefined));
+            settings.darkTheme : undefined));
         let width = (window.innerWidth > 0) ? window.innerWidth : window.screen.width;
 
         let footer: any;
@@ -28,16 +28,16 @@ class RootPage extends React.Component<any, any> {
             footer = (
                 <div className="footer">
                     © 2022 <a href="https://github.com/SOSML">The SOSML developers</a> | <a
-                    href="https://www.uni-saarland.de/footer/dialog/impressum.html">Imprint</a>
+                        href="https://www.uni-saarland.de/footer/dialog/impressum.html">Imprint</a>
                 </div>
             );
         } else {
             footer = (
                 <div className="footer">
                     © 2022 <a href="https://github.com/SOSML">The SOSML Developers</a> | <a
-                    href="https://github.com/SOSML/SOSML">Sources on GitHub</a> | <a
-                    href="https://github.com/SOSML/SOSML/issues">File a Bug</a> | <a
-                    href="https://www.uni-saarland.de/impressum">Imprint</a>
+                        href="https://github.com/SOSML/SOSML">Sources on GitHub</a> | <a
+                            href="https://github.com/SOSML/SOSML/issues">File a Bug</a> | <a
+                                href="https://www.uni-saarland.de/impressum">Imprint</a>
                 </div>
             );
         }
@@ -54,7 +54,9 @@ class RootPage extends React.Component<any, any> {
         }
 
         return (
-            <Router>
+            // <Router basename={ROUTE_BASENAME}>
+            // TODO: handle using webpack
+            <Router basename={"/SOOCaml-frontend"}>
                 <div className="rootPage">
                     <style>{theme}</style>
                     <MenuBar />
@@ -68,9 +70,9 @@ class RootPage extends React.Component<any, any> {
                     <Route path="/examplefile/:name" component={FileIntermediate} />
                     <Route path="/share/:hash" component={Editor} />
                     <Route path="/wishare/:hash" component={Wishes} />
-                {footer}
+                    {footer}
                 </div>
-            </Router>
+            </Router >
         );
     }
 }
