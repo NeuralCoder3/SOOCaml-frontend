@@ -36,7 +36,7 @@ class Landing extends React.Component<any, any> {
             );
             sharing = (
                 <div className="selectable" style={{ textAlign: 'justify' }}>
-                    You can share the code that is currently shown in SOSML by using
+                    You can share the code that is currently shown in SOOCaml by using
                     the <p className="buttonSimul"><span
                         className="glyphicon glyphicon-link" /> Share</p> button. Your code
                     will be uploaded to the servers
@@ -49,7 +49,7 @@ class Landing extends React.Component<any, any> {
                     <Alert variant="info" className="selectable"><strong>Warning: </strong>
                         Only upload files and content to which you own the copyright.
                         By uploading a file to the servers of Saarland University, you grant Saarland
-                        University and the <a href="https://github.com/SOSML"> SOSML Developers </a>
+                        University and the <a href="https://github.com/NeuralCoder3/SOOCaml-frontend"> SOOCaml Developers </a>
                         a non-exclusive, worldwide, royalty-free, sub-licensable, and transferable
                         license to use, publish, and create derivative works of your uploaded file.
                         Further, we cannot guarantee the availability of your uploaded files.
@@ -61,7 +61,7 @@ class Landing extends React.Component<any, any> {
             wishB = (
                 <button className="btn btn-pri-alt" onClick={this.handleRedirectToWishes}
                     style={style} type="button">
-                    <span className="glyphicon glyphicon-exclamation-sign" />&nbsp;I wish to learn SML.
+                    <span className="glyphicon glyphicon-exclamation-sign" />&nbsp;I wish to learn OCaml.
                 </button>
             );
         }

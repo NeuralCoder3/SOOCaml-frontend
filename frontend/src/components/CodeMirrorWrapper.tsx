@@ -142,6 +142,8 @@ class IncrementalInterpretationHelper {
         const parts = code.split(endTag).filter((x: string) => x !== '');
         this.partialOutput = '';
         let parity = true;
+        // @ts-ignore
+        resetInterpreter();
         for (const part of parts) {
             let response = "";
             try {
@@ -155,7 +157,10 @@ class IncrementalInterpretationHelper {
             }
             if (!response.endsWith("\n"))
                 response += "\n";
-            this.partialOutput += "\\" + (parity ? "1" : "2") + "> " + response;
+            let kind = parity ? "1" : "2";
+            if (response.includes("Error"))
+                kind = "3";
+            this.partialOutput += "\\" + kind + "> " + response;
             this.outputCallback(this.partialOutput, false);
             parity = !parity;
         }
