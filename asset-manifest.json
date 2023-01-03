@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/SOOCaml-frontend/static/css/main.092e11c7.chunk.css",
-    "main.js": "/SOOCaml-frontend/static/js/main.ae8b54e0.chunk.js",
-    "main.js.map": "/SOOCaml-frontend/static/js/main.ae8b54e0.chunk.js.map",
+    "main.js": "/SOOCaml-frontend/static/js/main.49adb5eb.chunk.js",
+    "main.js.map": "/SOOCaml-frontend/static/js/main.49adb5eb.chunk.js.map",
     "runtime-main.js": "/SOOCaml-frontend/static/js/runtime-main.f8271a27.js",
     "runtime-main.js.map": "/SOOCaml-frontend/static/js/runtime-main.f8271a27.js.map",
     "static/css/2.7a7d2dfe.chunk.css": "/SOOCaml-frontend/static/css/2.7a7d2dfe.chunk.css",
     "static/js/2.b2e12971.chunk.js": "/SOOCaml-frontend/static/js/2.b2e12971.chunk.js",
     "static/js/2.b2e12971.chunk.js.map": "/SOOCaml-frontend/static/js/2.b2e12971.chunk.js.map",
     "index.html": "/SOOCaml-frontend/index.html",
-    "precache-manifest.b11d0db4ca590a306f9dfe37819a94ac.js": "/SOOCaml-frontend/precache-manifest.b11d0db4ca590a306f9dfe37819a94ac.js",
+    "precache-manifest.250e544793ac6d6f69ce32960068a007.js": "/SOOCaml-frontend/precache-manifest.250e544793ac6d6f69ce32960068a007.js",
     "service-worker.js": "/SOOCaml-frontend/service-worker.js",
     "static/css/2.7a7d2dfe.chunk.css.map": "/SOOCaml-frontend/static/css/2.7a7d2dfe.chunk.css.map",
     "static/css/main.092e11c7.chunk.css.map": "/SOOCaml-frontend/static/css/main.092e11c7.chunk.css.map",
@@ -20,6 +20,6 @@
     "static/css/2.7a7d2dfe.chunk.css",
     "static/js/2.b2e12971.chunk.js",
     "static/css/main.092e11c7.chunk.css",
-    "static/js/main.ae8b54e0.chunk.js"
+    "static/js/main.49adb5eb.chunk.js"
   ]
 }
