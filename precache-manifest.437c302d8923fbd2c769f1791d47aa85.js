@@ -1,6 +1,6 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "516704972d4334ad15ac266e6544f80d",
+    "revision": "9661dca330c38b86a9ffa07655ccaded",
     "url": "/SOOCaml-frontend/index.html"
   },
   {
@@ -8,7 +8,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/SOOCaml-frontend/static/css/2.7a7d2dfe.chunk.css"
   },
   {
-    "revision": "a268b2b45e18757c95be",
+    "revision": "8d93884de96e08604f28",
     "url": "/SOOCaml-frontend/static/css/main.092e11c7.chunk.css"
   },
   {
@@ -20,8 +20,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/SOOCaml-frontend/static/js/2.b2e12971.chunk.js.LICENSE.txt"
   },
   {
-    "revision": "a268b2b45e18757c95be",
-    "url": "/SOOCaml-frontend/static/js/main.0cf2ef1e.chunk.js"
+    "revision": "8d93884de96e08604f28",
+    "url": "/SOOCaml-frontend/static/js/main.6c18e9ca.chunk.js"
   },
   {
     "revision": "965e87059617d4ac0d05",
