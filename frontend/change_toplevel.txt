@@ -1,0 +1,9 @@
+Changes to change toplevel -> under folder
+
+package.json
+"homepage": "https://neuralcoder3.github.io/SOOCaml-frontend",
+
+
+RootPage
+basename={"/SOOCaml-frontend"}
+

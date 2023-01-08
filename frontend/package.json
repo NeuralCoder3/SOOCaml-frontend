@@ -1,7 +1,6 @@
 {
     "name": "@sosml/frontend",
     "version": "2.3.0",
-    "homepage": "https://neuralcoder3.github.io/SOOCaml-frontend",
     "repository": {
         "type": "git",
         "url": "https://github.com/SOSML/SOSML-frontend.git"

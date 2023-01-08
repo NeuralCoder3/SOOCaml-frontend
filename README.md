@@ -1,5 +1,7 @@
 # OCaml Version of SOSML
 
+Note: The website with server backing is http://89.58.5.223/ (new: http://soocaml.ultrasrv.de/).
+
 The goal is to update SOSML to support OCaml.
 
 There are multiple ways to do this:
