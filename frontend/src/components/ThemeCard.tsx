@@ -27,7 +27,7 @@ class ThemeCard extends React.Component<Props, any> {
 
         let lightButton = (
             <div className={this.props.activeLight ? 'btn btn-def-inv' : 'btn btn-def-alt'}
-                style={{padding: "0px 5px 2px 5px"}}
+                style={{ padding: "0px 5px 2px 5px" }}
                 onClick={(a: any) => this.props.changeTheme('light', this.props.themeName)}>
                 <Icon icon='sun' size="16pt"
                     stroke={this.props.activeLight ? fgInvColor : borderColor}
@@ -36,7 +36,7 @@ class ThemeCard extends React.Component<Props, any> {
         );
         let mixedButton = (
             <div className={this.props.activeLight ? 'btn btn-def-inv' : 'btn btn-def-alt'}
-                style={{padding: "0px 5px 2px 5px"}}
+                style={{ padding: "0px 5px 2px 5px" }}
                 onClick={(a: any) => this.props.changeTheme('light', this.props.themeName)}>
                 <Icon icon='sunmoon' size="16pt"
                     stroke={this.props.activeLight ? fgInvColor : borderColor}
@@ -45,35 +45,36 @@ class ThemeCard extends React.Component<Props, any> {
         );
         let darkButton = (
             <div className={this.props.activeDark ? 'btn btn-def-inv' : 'btn btn-def-alt'}
-            style={{padding: "0px 5px 2px 5px"}}
-            onClick={(a: any) => this.props.changeTheme('dark', this.props.themeName)}>
+                style={{ padding: "0px 5px 2px 5px" }}
+                onClick={(a: any) => this.props.changeTheme('dark', this.props.themeName)}>
                 <Icon icon='moon' size="16pt"
-                stroke={this.props.activeDark ? fgInvColor : borderColor}
-                fill={this.props.activeDark ? fgInvColor : bgColor} />
+                    stroke={this.props.activeDark ? fgInvColor : borderColor}
+                    fill={this.props.activeDark ? fgInvColor : bgColor} />
             </div>
         );
 
         return (
             <Card>
                 <div>
-                <div style={{
-                    fontSize: "16px",
-                    display: "inline-block",
-                    paddingTop: "4px",
-                    paddingLeft: "5px",
-                    fontFamily: "monospace"
-                }}>{this.props.themeName}</div>
-                <div className="inlineBlock" style={{
-                    marginTop: "-1px", marginRight: "-1px",
-                    position: "relative",
-                    display: "flex",
-                    float: "right"}}>
-                    {this.props.combine ? mixedButton : lightButton}
-                    {!this.props.combine ? (<div className="miniSpacer" />) : ''}
-                    {!this.props.combine ? darkButton : ''}
+                    <div style={{
+                        fontSize: "16px",
+                        display: "inline-block",
+                        paddingTop: "4px",
+                        paddingLeft: "5px",
+                        fontFamily: "monospace"
+                    }}>{this.props.themeName}</div>
+                    <div className="inlineBlock" style={{
+                        marginTop: "-1px", marginRight: "-1px",
+                        position: "relative",
+                        display: "flex",
+                        float: "right"
+                    }}>
+                        {this.props.combine ? mixedButton : lightButton}
+                        {!this.props.combine ? (<div className="miniSpacer" />) : ''}
+                        {!this.props.combine ? darkButton : ''}
+                    </div>
                 </div>
-                </div>
-                <Card.Body style={{paddingLeft: '0', paddingBottom: '0', paddingRight: '0'}}>
+                <Card.Body style={{ paddingLeft: '0', paddingBottom: '0', paddingRight: '0' }}>
                     <div style={{
                         borderTop: '1px solid ' + getColor(settings.theme, dt, 'alert_fg'),
                         color: theme.foreground,
@@ -86,8 +87,8 @@ class ThemeCard extends React.Component<Props, any> {
                             backgroundColor: theme.navbar_bg
                         }}>
                             <Icon icon="sosml" stroke={theme.icon_bg}
-                            fill={theme.icon_fg} size="24px" />
-                            <span style={{verticalAlign: "middle", fontSize: "12.5pt", fontFamily: "monospace"}}><b> SOSML
+                                fill={theme.icon_fg} size="24px" />
+                            <span style={{ verticalAlign: "middle", fontSize: "12.5pt", fontFamily: "monospace" }}><b> SOOCaml
                             </b></span>
                         </div>
                         <div style={{
@@ -144,19 +145,22 @@ class ThemeCard extends React.Component<Props, any> {
                             border: '1px solid ' + theme.border,
                             fontFamily: 'monospace'
                         }}>
-                            <div style={{backgroundColor: theme.success,
+                            <div style={{
+                                backgroundColor: theme.success,
                                 paddingLeft: '5px'
-                            }}><span style={{color: theme.cm_builtin}}>print
-                            </span> <span style={{color: theme.cm_string}}>"{this.props.themeName}"</span>;</div>
-                            <div style={{backgroundColor: theme.success_alt,
+                            }}><span style={{ color: theme.cm_builtin }}>print
+                                </span> <span style={{ color: theme.cm_string }}>"{this.props.themeName}"</span>;</div>
+                            <div style={{
+                                backgroundColor: theme.success_alt,
                                 paddingLeft: '5px'
-                            }}><span style={{color: theme.cm_comment}}>(* Comment *)</span>;</div>
-                            <div style={{backgroundColor: theme.error,
+                            }}><span style={{ color: theme.cm_comment }}>(* Comment *)</span>;</div>
+                            <div style={{
+                                backgroundColor: theme.error,
                                 paddingLeft: '5px'
-                            }}><span style={{color: theme.cm_keyword}}><b>val</b>
-                            </span> <span style={{color: theme.cm_variable}}>x
-                            </span> <span style={{color: theme.cm_keyword}}>*
-                            </span> <span style={{color: theme.cm_number}}>10</span>;</div>
+                            }}><span style={{ color: theme.cm_keyword }}><b>val</b>
+                                </span> <span style={{ color: theme.cm_variable }}>x
+                                </span> <span style={{ color: theme.cm_keyword }}>*
+                                </span> <span style={{ color: theme.cm_number }}>10</span>;</div>
                         </div>
                     </div>
                 </Card.Body>

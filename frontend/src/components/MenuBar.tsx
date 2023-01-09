@@ -33,9 +33,9 @@ class MenuBar extends React.Component<any, State> {
             wshlink = (
                 <Nav>
                     <Nav.Link eventKey="2" as="div">
-                    <NavLink to="/wishes" className="nav-link2">
-                        <span className="glyphicon glyphicon-exclamation-sign" /> Wishes
-                    </NavLink>
+                        <NavLink to="/wishes" className="nav-link2">
+                            <span className="glyphicon glyphicon-exclamation-sign" /> Wishes
+                        </NavLink>
                     </Nav.Link>
                 </Nav>
             );
@@ -45,14 +45,16 @@ class MenuBar extends React.Component<any, State> {
             <Navbar collapseOnSelect fixed="top"
                 className={(this.state.forcedDisplay) ? 'forcedDisplay' : ''}>
                 <div className="navbar-header">
-                    <Navbar.Brand style={{float: 'left', height: '50px', padding: '9px',
-                        fontSize: '18px', lineHeight: '20px'}}>
+                    <Navbar.Brand style={{
+                        float: 'left', height: '50px', padding: '9px',
+                        fontSize: '18px', lineHeight: '20px'
+                    }}>
                         <Nav.Link eventKey="0" as="div">
-                        <NavLink to="/" className="nav-brand">
-                            <Icon icon="sosml" stroke={black} fill={white} size="28px" /><span
-                            style={{verticalAlign: "middle"}}> SOSML
-                            </span>
-                        </NavLink>
+                            <NavLink to="/" className="nav-brand">
+                                <Icon icon="sosml" stroke={black} fill={white} size="28px" /><span
+                                    style={{ verticalAlign: "middle" }}> SOOCaml
+                                </span>
+                            </NavLink>
                         </Nav.Link>
                     </Navbar.Brand>
                     <Navbar.Toggle aria-controls="basic-navbar-nav">
@@ -63,23 +65,23 @@ class MenuBar extends React.Component<any, State> {
                     <Nav>
                         <Nav.Link eventKey="1" as="div">
                             <NavLink to="/editor" className="nav-link2">
-                            <span className="glyphicon glyphicon-pencil" /> Editor
+                                <span className="glyphicon glyphicon-pencil" /> Editor
                             </NavLink>
                         </Nav.Link>
                     </Nav>
                     <Nav>
                         <Nav.Link eventKey="2" as="div">
-                        <NavLink to="/files" className="nav-link2">
-                            <span className="glyphicon glyphicon-duplicate" /> Files
-                        </NavLink>
+                            <NavLink to="/files" className="nav-link2">
+                                <span className="glyphicon glyphicon-duplicate" /> Files
+                            </NavLink>
                         </Nav.Link>
                     </Nav>
                     {wshlink}
                     <div className="navbar-right">
                         <Nav.Link eventKey="3" as="div">
-                        <NavLink to="/settings" className="nav-link2">
-                            <span className="glyphicon glyphicon-cog" /> Settings
-                        </NavLink>
+                            <NavLink to="/settings" className="nav-link2">
+                                <span className="glyphicon glyphicon-cog" /> Settings
+                            </NavLink>
                         </Nav.Link>
                     </div>
                 </Navbar.Collapse>
@@ -89,7 +91,7 @@ class MenuBar extends React.Component<any, State> {
 
     // Hover control
     componentDidMount() {
-        window.addEventListener('mousemove', this.handleBrowserMouseMove, {passive: true});
+        window.addEventListener('mousemove', this.handleBrowserMouseMove, { passive: true });
     }
 
     componentWillUnmount() {
