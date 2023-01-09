@@ -146,6 +146,7 @@ class IncrementalInterpretationHelper {
         resetInterpreter();
         for (const part of parts) {
             let response = "";
+            // @ts-ignore
             try {
                 // @ts-ignore
                 // response = evaluator.execute(part + endTag);

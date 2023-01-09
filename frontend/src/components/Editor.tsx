@@ -1,11 +1,13 @@
 import * as React from 'react';
 
 import Playground from './Playground';
-import { Form , Alert, Button } from 'react-bootstrap';
+import { Form, Alert, Button } from 'react-bootstrap';
 import { API } from '../api';
 import { getColor } from '../theme';
-import { getInterfaceSettings, Database, getTabId, setTabId,
-         getLastCachedFile, setLastCachedFile } from '../storage';
+import {
+    getInterfaceSettings, Database, getTabId, setTabId,
+    getLastCachedFile, setLastCachedFile
+} from '../storage';
 import './Editor.css';
 import { PIPELINE_ID } from './Version';
 
@@ -84,8 +86,10 @@ class Editor extends React.Component<any, State> {
                 return db.getFile(fileName, true);
             }).then((content: string) => {
                 this.setState((oldState) => {
-                    return {initialCode: content, fileName: dfn,
-                        requiredVersion: this.extractVersion(content)};
+                    return {
+                        initialCode: content, fileName: dfn,
+                        requiredVersion: this.extractVersion(content)
+                    };
                 });
             });
             return;
@@ -105,10 +109,12 @@ class Editor extends React.Component<any, State> {
                 }
                 promise.then((content: string) => {
                     this.setState((oldState) => {
-                        return {initialCode: content, fileName: state.fileName,
-                                shareReadMode: state.shareReadMode,
-                                shareHash: state.shareReadMode ? state.fileName : undefined,
-                                requiredVersion: this.extractVersion(content)};
+                        return {
+                            initialCode: content, fileName: state.fileName,
+                            shareReadMode: state.shareReadMode,
+                            shareHash: state.shareReadMode ? state.fileName : undefined,
+                            requiredVersion: this.extractVersion(content)
+                        };
                     });
                 });
                 return;
@@ -117,14 +123,18 @@ class Editor extends React.Component<any, State> {
                     return db.getFile(state.shareHash, false, true);
                 }).then((content: string) => {
                     this.setState((oldState) => {
-                        return {initialCode: content, fileName: state.shareHash,
-                            shareReadMode: false, requiredVersion: this.extractVersion(content)};
+                        return {
+                            initialCode: content, fileName: state.shareHash,
+                            shareReadMode: false, requiredVersion: this.extractVersion(content)
+                        };
                     });
                 }).catch((error: any) => {
                     API.loadSharedCode(state.shareHash).then((content: string) => {
                         this.setState((oldState) => {
-                            return {initialCode: content,
-                                requiredVersion: this.extractVersion(content)};
+                            return {
+                                initialCode: content,
+                                requiredVersion: this.extractVersion(content)
+                            };
                         });
 
                         // Cache the shared file as it does not yet exist
@@ -132,7 +142,7 @@ class Editor extends React.Component<any, State> {
                             return db.saveShare(state.shareHash, content, false);
                         });
                     }).catch((error: any) => {
-                        this.setState({'error': error});
+                        this.setState({ 'error': error });
                     });
                 });
                 return;
@@ -146,14 +156,18 @@ class Editor extends React.Component<any, State> {
                 return db.getFile(shareName, false, true);
             }).then((content: string) => {
                 this.setState((oldState) => {
-                    return {initialCode: content, shareReadMode: true, shareHash: shareName,
-                        requiredVersion: this.extractVersion(content)};
+                    return {
+                        initialCode: content, shareReadMode: true, shareHash: shareName,
+                        requiredVersion: this.extractVersion(content)
+                    };
                 });
             }).catch((error: any) => {
                 API.loadSharedCode(shareName).then((content: string) => {
                     this.setState((oldState) => {
-                        return {initialCode: content, shareReadMode: true, shareHash: shareName,
-                            requiredVersion: this.extractVersion(content)};
+                        return {
+                            initialCode: content, shareReadMode: true, shareHash: shareName,
+                            requiredVersion: this.extractVersion(content)
+                        };
                     });
 
                     // Cache the shared file as it does not yet exist
@@ -161,7 +175,7 @@ class Editor extends React.Component<any, State> {
                         return db.saveShare(shareName, content, false);
                     });
                 }).catch((error: any) => {
-                    this.setState({'error': error});
+                    this.setState({ 'error': error });
                 });
             });
             return;
@@ -183,8 +197,10 @@ class Editor extends React.Component<any, State> {
                 return db.getFile(pfileName, true);
             }).then((content: string) => {
                 this.setState((oldState) => {
-                    return {initialCode: content, fileName: fileName,
-                        requiredVersion: this.extractVersion(content)};
+                    return {
+                        initialCode: content, fileName: fileName,
+                        requiredVersion: this.extractVersion(content)
+                    };
                 });
             });
             return;
@@ -198,10 +214,10 @@ class Editor extends React.Component<any, State> {
 
         if (this.state.requiredVersion > +PIPELINE_ID) {
             errorBar = (
-                <Alert variant="danger" style={{margin: '0 3px 3px'}}>
+                <Alert variant="danger" style={{ margin: '0 3px 3px' }}>
                     <b>Warning: </b>
                     The current code requires at least version {this.state.requiredVersion} of
-                    SOSML. It may not work correctly in your version of SOSML
+                    SOOCaml. It may not work correctly in your version of SOOCaml
                     (version {+PIPELINE_ID}).
                     <div className="miniSpacer" />
                 </Alert>
@@ -210,12 +226,12 @@ class Editor extends React.Component<any, State> {
 
         if (this.state.error) {
             errorBar = (
-                <Alert variant="danger" style={{margin: '0 3px 3px'}}>
+                <Alert variant="danger" style={{ margin: '0 3px 3px' }}>
                     <b>Error: </b>
                     The specified file was not found.
                     <div className="miniSpacer" />
                     <Button className="button btn-dng-alt" onClick={(evt: any) => {
-                        this.setState({error: ''});
+                        this.setState({ error: '' });
                     }}>Dismiss</Button>
                 </Alert>
             );
@@ -223,12 +239,12 @@ class Editor extends React.Component<any, State> {
 
         if (this.state.shareReadMode) {
             topBar = (
-                <Alert variant="info" style={{margin: '0 3px 3px'}}>
+                <Alert variant="info" style={{ margin: '0 3px 3px' }}>
                     <b>Warning: </b>
                     You are viewing a read-only file.
                     <div className="miniSpacer" />
                     <Button className="button btn-suc-alt" onClick={this.handleRedirectToEdit}>Create
-                    an editable copy</Button>
+                        an editable copy</Button>
                 </Alert>
             );
         } else {
@@ -247,7 +263,7 @@ class Editor extends React.Component<any, State> {
                 <Form inline={true} className="inlineBlock" onSubmit={this.handleFormSubmit}>
                     <input className="form-control" type="text"
                         value={this.state.fileName} onChange={this.handleFileNameChange}
-                        style={style} placeholder="File name"/>
+                        style={style} placeholder="File name" />
                     <Button size="sm" className="button btn-pri-alt" onClick={this.handleSave}>
                         <span className="glyphicon glyphicon-file" /> Store
                     </Button>
@@ -260,7 +276,7 @@ class Editor extends React.Component<any, State> {
                 {topBar}
                 <Playground readOnly={this.state.shareReadMode} onCodeChange={this.handleCodeChange}
                     onResize={this.onResize} initialCode={this.state.initialCode}
-                    fileControls={fileForm}  />
+                    fileControls={fileForm} />
             </div>
         );
     }
@@ -271,13 +287,13 @@ class Editor extends React.Component<any, State> {
     }
 
     handleRedirectToEdit() {
-        this.props.history.push('/editor', {shareHash: this.state.shareHash});
+        this.props.history.push('/editor', { shareHash: this.state.shareHash });
     }
 
     handleFileNameChange(evt: any) {
         let name = evt.target.value;
         this.setState(prevState => {
-            return {fileName: name};
+            return { fileName: name };
         });
     }
 
@@ -286,9 +302,9 @@ class Editor extends React.Component<any, State> {
             clearTimeout(this.state.savedFeedbackTimer);
         }
         let timer = setTimeout(() => {
-            this.setState({savedFeedback: FEEDBACK_NONE, savedFeedbackTimer: null});
+            this.setState({ savedFeedback: FEEDBACK_NONE, savedFeedbackTimer: null });
         }, 1300);
-        this.setState({savedFeedback: feedback, savedFeedbackTimer: timer});
+        this.setState({ savedFeedback: feedback, savedFeedbackTimer: timer });
     }
 
     handleSave() {
@@ -311,14 +327,14 @@ class Editor extends React.Component<any, State> {
             return;
         }
         this.setState(prevState => {
-            return {code: newCode, requiredVersion: this.extractVersion(newCode)};
+            return { code: newCode, requiredVersion: this.extractVersion(newCode) };
         });
 
         this.props.history.replace('/editor?' + getTabId() + '&' + this.state.fileName);
 
         Database.getInstance().then((db: Database) => {
             return db.saveFile(getTabId() + '/' + this.state.fileName,
-                               this.state.code, true);
+                this.state.code, true);
         });
 
         fileInCache = this.state.fileName;
@@ -328,15 +344,15 @@ class Editor extends React.Component<any, State> {
     onResize() {
         if (this.state.shareHash === undefined) {
             this.setState(prevState => {
-                return {initialCode: prevState.code};
+                return { initialCode: prevState.code };
             });
         }
         let width = (window.innerWidth > 0) ? window.innerWidth : window.screen.width;
         let height = (window.innerHeight > 0) ? window.innerHeight : window.screen.height;
         if (height <= width) {
-            this.setState({width: width / 2});
+            this.setState({ width: width / 2 });
         } else {
-            this.setState({width: width});
+            this.setState({ width: width });
         }
     }
 }

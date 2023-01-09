@@ -9,8 +9,10 @@ import { Button } from 'react-bootstrap';
 import './Playground.css';
 import { API as WebserverAPI } from '../api';
 import { getColor } from '../theme';
-import { Database, InterfaceSettings, getInterfaceSettings,
-         InterpreterSettings, getInterpreterSettings } from '../storage';
+import {
+    Database, InterfaceSettings, getInterfaceSettings,
+    InterpreterSettings, getInterpreterSettings
+} from '../storage';
 import { SHARING_ENABLED } from '../config';
 
 interface State {
@@ -73,23 +75,23 @@ class Playground extends React.Component<Props, State> {
 
         let interpreterSettings: InterpreterSettings =
             this.props.interpreterSettings === undefined ? getInterpreterSettings()
-            : this.props.interpreterSettings;
+                : this.props.interpreterSettings;
 
         let dt: string | undefined = settings.autoSelectTheme ? settings.darkTheme : undefined;
         if (dt === undefined) {
             extraCSS += '.eval-fail { background-color: '
-            + this.state.interfaceSettings.errorColor + ' !important; }';
+                + this.state.interfaceSettings.errorColor + ' !important; }';
             extraCSS += '.eval-success { background-color: '
-            + this.state.interfaceSettings.successColor1 + ' !important; }';
+                + this.state.interfaceSettings.successColor1 + ' !important; }';
             extraCSS += '.eval-success-odd { background-color: '
-            + this.state.interfaceSettings.successColor2 + ' !important; }';
+                + this.state.interfaceSettings.successColor2 + ' !important; }';
         } else {
             extraCSS += '.eval-fail { background-color: '
-            + getColor(settings.theme, dt, 'error') + ' !important; }';
+                + getColor(settings.theme, dt, 'error') + ' !important; }';
             extraCSS += '.eval-success { background-color: '
-            + getColor(settings.theme, dt, 'success') + ' !important; }';
+                + getColor(settings.theme, dt, 'success') + ' !important; }';
             extraCSS += '.eval-success-odd { background-color: '
-            + getColor(settings.theme, dt, 'success_alt') + ' !important; }';
+                + getColor(settings.theme, dt, 'success_alt') + ' !important; }';
         }
 
 
@@ -104,12 +106,14 @@ class Playground extends React.Component<Props, State> {
         lines.map((line) => {
             let data: [JSX.Element, number, number] = this.parseLine(line, key++, markingColor);
             if (markingColor !== data[1] && data[2] > interpreterSettings.showUsedTimeWhenAbove
-               && interpreterSettings.showUsedTimeWhenAbove > -1) {
+                && interpreterSettings.showUsedTimeWhenAbove > -1) {
                 let excTime = (
-                    <pre style={{padding: 0, display: 'inline', margin: 0, borderRadius: 0,
-                        fontSize: '70%', float: 'right', border: '0'}}
-                    className={this.getHighlightForColor(data[1])} key={key + '@time'}>
-                    {' ' + data[2] + 'ms'}
+                    <pre style={{
+                        padding: 0, display: 'inline', margin: 0, borderRadius: 0,
+                        fontSize: '70%', float: 'right', border: '0'
+                    }}
+                        className={this.getHighlightForColor(data[1])} key={key + '@time'}>
+                        {' ' + data[2] + 'ms'}
                     </pre>
                 );
                 lineItems.push(excTime);
@@ -123,7 +127,7 @@ class Playground extends React.Component<Props, State> {
         if (this.state.reset) {
             code = '';
             // This is a hacky solution to reset the editor, needs to be done properly
-            this.setState({reset: false});
+            this.setState({ reset: false });
         }
 
         let modal: JSX.Element | undefined;
@@ -131,7 +135,7 @@ class Playground extends React.Component<Props, State> {
             if (this.state.formContract) {
                 modal = (
                     <ContractModal closeCallback={this.modalCloseCallback}
-                        createCallback={this.modalCreateContractCallback}/>
+                        createCallback={this.modalCreateContractCallback} />
                 );
             } else {
                 modal = (
@@ -139,29 +143,29 @@ class Playground extends React.Component<Props, State> {
                         || this.state.shareLink === SHARE_LINK_ERROR_NO_CONTRACT}
                         link={this.state.shareLink} closeCallback={this.modalCloseCallback}
                         enocontract={this.state.shareLink === SHARE_LINK_ERROR_NO_CONTRACT}
-                        formContractCallback={this.modalFormContractCallback}/>
+                        formContractCallback={this.modalFormContractCallback} />
                 );
             }
         }
         let spacer: JSX.Element | undefined = (
-                <div className="miniSpacer" />
-            );
+            <div className="miniSpacer" />
+        );
         let shareElements: JSX.Element | undefined;
         if (!this.props.readOnly && SHARING_ENABLED) {
             shareElements = (
                 <Button size="sm" className="btn btn-pri-alt" onClick={this.handleShareWrapper}>
-                <div className="glyphicon glyphicon-link" /> Share
+                    <div className="glyphicon glyphicon-link" /> Share
                 </Button>
             );
         }
         let resetBtn: JSX.Element | undefined;
         if (this.props.onReset !== undefined) {
             resetBtn = (
-                         <Button size="sm" className="button btn-dng-alt"
-                         onClick={this.clearCodeWindow}>
-                            <span className="glyphicon glyphicon-repeat" /> Reset
-                         </Button>
-                        );
+                <Button size="sm" className="button btn-dng-alt"
+                    onClick={this.clearCodeWindow}>
+                    <span className="glyphicon glyphicon-repeat" /> Reset
+                </Button>
+            );
         }
 
 
@@ -187,17 +191,17 @@ class Playground extends React.Component<Props, State> {
             <div className="flexcomponent flexy">
                 <MiniWindow content={(
                     <CodeMirrorWrapper flex={true}
-                    onChange={this.handleCodeChange} code={code}
-                    readOnly={this.props.readOnly} outputCallback={this.handleOutputChange}
-                    interpreterSettings={this.props.interpreterSettings}
-                    beforeCode={this.props.beforeCode}
-                    afterCode={this.props.afterCode}
-                    timeout={this.state.interfaceSettings.timeout} />
+                        onChange={this.handleCodeChange} code={code}
+                        readOnly={this.props.readOnly} outputCallback={this.handleOutputChange}
+                        interpreterSettings={this.props.interpreterSettings}
+                        beforeCode={this.props.beforeCode}
+                        afterCode={this.props.afterCode}
+                        timeout={this.state.interfaceSettings.timeout} />
                 )} header={(
                     <div className="headerButtons">
                         {inputHeadBar}
                     </div>
-                )} title="SML" className="flexy" updateAnchor={this.state.sizeAnchor} />
+                )} title="OCaml" className="flexy" updateAnchor={this.state.sizeAnchor} />
             </div>
         );
         let output = (
@@ -206,7 +210,7 @@ class Playground extends React.Component<Props, State> {
                     <div>
                         {lineItems}
                     </div>
-                } title="Output" className="flexy" updateAnchor={this.state.sizeAnchor}/>
+                } title="Output" className="flexy" updateAnchor={this.state.sizeAnchor} />
             </div>
         );
 
@@ -248,17 +252,17 @@ class Playground extends React.Component<Props, State> {
             // eslint-disable-next-line
             this.state.interfaceSettings.userContributesEnergy = true;
             localStorage.setItem('interfaceSettings',
-                                 JSON.stringify(this.state.interfaceSettings));
+                JSON.stringify(this.state.interfaceSettings));
         }
         this.handleShare(true);
     }
 
     componentDidMount() {
-        window.addEventListener('resize', this.handleBrowserResize, {passive: true});
-        window.addEventListener('keyup', this.handleBrowserKeyup, {passive: true});
+        window.addEventListener('resize', this.handleBrowserResize, { passive: true });
+        window.addEventListener('keyup', this.handleBrowserKeyup, { passive: true });
 
         let settings: InterfaceSettings = getInterfaceSettings();
-        this.setState({'interfaceSettings': settings});
+        this.setState({ 'interfaceSettings': settings });
 
         if (settings.fullscreen) {
             this.getBodyClassList().add('fullscreen');
@@ -272,7 +276,7 @@ class Playground extends React.Component<Props, State> {
     }
 
     handleSplitterUpdate(sizeAnchor: any) {
-        this.setState({sizeAnchor});
+        this.setState({ sizeAnchor });
     }
 
     handleLeftResize() {
@@ -285,9 +289,9 @@ class Playground extends React.Component<Props, State> {
 
     handleBrowserResize() {
         if (this.state.sizeAnchor === -2) {
-            this.setState({sizeAnchor: -1});
+            this.setState({ sizeAnchor: -1 });
         } else {
-            this.setState({sizeAnchor: -2});
+            this.setState({ sizeAnchor: -2 });
         }
         if (this.props.onResize) {
             this.props.onResize();
@@ -314,13 +318,13 @@ class Playground extends React.Component<Props, State> {
             // eslint-disable-next-line
             this.state.interfaceSettings.fullscreen = newval;
             localStorage.setItem('interfaceSettings',
-                                 JSON.stringify(this.state.interfaceSettings));
+                JSON.stringify(this.state.interfaceSettings));
         }
     }
 
     handleCodeChange(newCode: string) {
         this.setState(prevState => {
-            return {code: newCode};
+            return { code: newCode };
         });
         if (this.props.onCodeChange) {
             this.props.onCodeChange(newCode);
@@ -330,7 +334,7 @@ class Playground extends React.Component<Props, State> {
     handleOutputChange(newOutput: string, complete: boolean) {
         if (!complete) {
             this.setState(prevState => {
-                let ret: any = {output: newOutput};
+                let ret: any = { output: newOutput };
                 return ret;
             });
         }
@@ -348,7 +352,7 @@ class Playground extends React.Component<Props, State> {
             // We have the user's soul, so we can get "energy"
             WebserverAPI.shareCode(this.state.code).then((hash) => {
                 this.setState(prevState => {
-                    return {shareLink: window.location.host + '/share/' + hash};
+                    return { shareLink: window.location.host + '/share/' + hash };
                 });
 
                 // Store the share file locally
@@ -356,15 +360,15 @@ class Playground extends React.Component<Props, State> {
                     return db.saveShare(hash, this.state.code, true);
                 });
             }).catch(() => {
-                this.setState({shareLink: SHARE_LINK_ERROR});
+                this.setState({ shareLink: SHARE_LINK_ERROR });
             });
         } else {
-            this.setState({shareLink: SHARE_LINK_ERROR_NO_CONTRACT});
+            this.setState({ shareLink: SHARE_LINK_ERROR_NO_CONTRACT });
         }
     }
 
     private clearCodeWindow() {
-        this.setState({reset: true});
+        this.setState({ reset: true });
         this.render();
         if (this.props.onReset !== undefined) {
             this.props.onReset();
@@ -393,7 +397,7 @@ class Playground extends React.Component<Props, State> {
     // parses \1, \2, \3 marks and formatting; returns [parsed line, new color, execution
     // time]
     private parseLine(line: string, key: number,
-                      markingColor: number): [JSX.Element, number, number] {
+        markingColor: number): [JSX.Element, number, number] {
         let start = 0;
         let executionTime = -1;
         let items: any[] = [];
@@ -473,7 +477,7 @@ class Playground extends React.Component<Props, State> {
             ), markingColor, executionTime];
         } else {
             return [(
-                <pre className={addClass} key={line + (key++)} style={{overflow: 'visible'}}>
+                <pre className={addClass} key={line + (key++)} style={{ overflow: 'visible' }}>
                     {items}
                 </pre>
             ), markingColor, executionTime];
