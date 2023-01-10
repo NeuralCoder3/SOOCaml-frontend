@@ -5,7 +5,7 @@ import { getInterfaceSettings, InterpreterSettings } from '../storage';
 let CodeMirror: any = require('codemirror');
 
 require('codemirror/lib/codemirror.css');
-require('../sml.js');
+require('../ocaml.js');
 
 /* imports for code folding */
 require('codemirror/addon/fold/foldgutter.js');
@@ -362,7 +362,7 @@ class CodeMirrorWrapper extends React.Component<Props, State> {
 
         const options = {
             lineNumbers: true,
-            mode: 'text/sml',
+            mode: 'text/x-ocaml',
             indentUnit: 2,
             smartIndent: autoIndent,
             tabSize: 2,
