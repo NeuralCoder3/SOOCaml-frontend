@@ -146,22 +146,30 @@ class IncrementalInterpretationHelper {
         resetInterpreter();
         for (const part of parts) {
             let response = "";
+            let out_response = "";
+            let err_response = "";
             // @ts-ignore
             try {
                 // @ts-ignore
                 // response = evaluator.execute(part + endTag);
-                response = execute(part + endTag);
+                const responses = execute(part + endTag);
+                response = responses[0];
+                out_response = responses[1];
+                err_response = responses[2];
             } catch (e) {
                 // TODO: try to catch errors from the evaluator
                 // console.log("caught error", e);
-                response = "" + e;
+                // response = "" + e;
+                err_response = "" + e;
             }
             if (!response.endsWith("\n"))
                 response += "\n";
             let kind = parity ? "1" : "2";
-            if (response.includes("Error"))
+            if (response.includes("Error") || err_response !== "")
                 kind = "3";
-            this.partialOutput += "\\" + kind + "> " + response;
+            if (out_response !== "")
+                out_response = "Output: \n" + out_response;
+            this.partialOutput += "\\" + kind + "> " + response + out_response + err_response;
             this.outputCallback(this.partialOutput, false);
             parity = !parity;
         }
