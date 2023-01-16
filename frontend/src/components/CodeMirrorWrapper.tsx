@@ -162,14 +162,19 @@ class IncrementalInterpretationHelper {
                 // response = "" + e;
                 err_response = "" + e;
             }
-            if (!response.endsWith("\n"))
-                response += "\n";
-            let kind = parity ? "1" : "2";
-            if (response.includes("Error") || err_response !== "")
-                kind = "3";
-            if (out_response !== "")
-                out_response = "Output: \n" + out_response;
-            this.partialOutput += "\\" + kind + "> " + response + out_response + err_response;
+            if (out_response.startsWith("IMAGE")) {
+                out_response = out_response.replace("IMAGE", "");
+                this.partialOutput += "IMAGE\n" + out_response + "\nEND_IMAGE";
+            } else {
+                if (!response.endsWith("\n"))
+                    response += "\n";
+                let kind = parity ? "1" : "2";
+                if (response.includes("Error") || err_response !== "")
+                    kind = "3";
+                if (out_response !== "")
+                    out_response = "Output: \n" + out_response;
+                this.partialOutput += "\\" + kind + "> " + response + out_response + err_response;
+            }
             this.outputCallback(this.partialOutput, false);
             parity = !parity;
         }

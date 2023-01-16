@@ -262,28 +262,28 @@ class SplitterLayout extends React.Component<Props, State> {
             }
             wrappedChildren.push(
                 <Pane vertical={this.props.vertical} percentage={this.props.percentage} primary={primary} size={size}>
-                {children[i]}
+                    {children[i]}
                 </Pane>
             );
         }
 
         return (
             <div className={containerClasses} ref={(c) => { this.container = c; }}>
-            {wrappedChildren[0]}
-            {wrappedChildren.length > 1 &&
-                (
-                    <div
-                    role="separator"
-                    className="layout-splitter"
-                    ref={(c) => { this.splitter = c; }}
-                    onMouseDown={this.handleSplitterMouseDown}
-                    onTouchStart={this.handleSplitterMouseDown}
-                    >
-                    {this.props.splitterChildren}
-                    </div>
-            )
-            }
-            {wrappedChildren.length > 1 && wrappedChildren[1]}
+                {wrappedChildren[0]}
+                {wrappedChildren.length > 1 &&
+                    (
+                        <div
+                            role="separator"
+                            className="layout-splitter"
+                            ref={(c) => { this.splitter = c; }}
+                            onMouseDown={this.handleSplitterMouseDown}
+                            onTouchStart={this.handleSplitterMouseDown}
+                        >
+                            {this.props.splitterChildren}
+                        </div>
+                    )
+                }
+                {wrappedChildren.length > 1 && wrappedChildren[1]}
             </div>
         );
     }

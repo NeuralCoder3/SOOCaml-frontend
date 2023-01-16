@@ -14,6 +14,59 @@ import {
     InterpreterSettings, getInterpreterSettings
 } from '../storage';
 import { SHARING_ENABLED } from '../config';
+import ppm from 'ppm';
+import { Readable } from 'stream';
+
+function PPMImage(props: { ppm_text: string }) {
+
+    let s = new Readable();
+    s.push(props.ppm_text);
+    s.push(null);
+
+    const [source, setSource] = React.useState<string>("https://i.imgur.com/epMSRQH.png");
+
+    ppm.parse(s, (err: any, data: any) => {
+        if (err) {
+            console.log("error", err);
+            return;
+        }
+        console.log("data", data);
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        if (ctx === null) {
+            console.log("error", "no context");
+            return;
+        }
+        let image_data = data as [[number, number, number]];
+        const data_width = image_data[0].length;
+        const data_height = image_data.length;
+        let zoom = Math.max(1, Math.round(300 / Math.max(data_width, data_height)));
+        canvas.height = data_height * zoom;
+        canvas.width = data_width * zoom;
+        let imgData = ctx.createImageData(canvas.width, canvas.height);
+        for (let i = 0; i < image_data.length; i++) {
+            for (let j = 0; j < image_data[i].length; j++) {
+                for (let k = 0; k < zoom; k++) {
+                    for (let l = 0; l < zoom; l++) {
+                        imgData.data[((i * zoom + k) * canvas.width + j * zoom + l) * 4 + 0] = image_data[i][j][0];
+                        imgData.data[((i * zoom + k) * canvas.width + j * zoom + l) * 4 + 1] = image_data[i][j][1];
+                        imgData.data[((i * zoom + k) * canvas.width + j * zoom + l) * 4 + 2] = image_data[i][j][2];
+                        imgData.data[((i * zoom + k) * canvas.width + j * zoom + l) * 4 + 3] = 255;
+                    }
+                }
+            }
+        }
+        ctx.putImageData(imgData, 0, 0);
+        setSource(canvas.toDataURL());
+    });
+
+
+    return (<img
+        src={source}
+        style={{ maxWidth: '100%', maxHeight: '100%' }}
+    />);
+}
+
 
 interface State {
     output: string;
@@ -99,11 +152,29 @@ class Playground extends React.Component<Props, State> {
         if (cleanedOutput.endsWith('\n')) {
             cleanedOutput = cleanedOutput.substr(0, cleanedOutput.length - 1);
         }
+        let lineItems: JSX.Element[] = [];
+        // console.log("cout", cleanedOutput);
         let lines: string[] = cleanedOutput.split('\n');
         var key = 0;
         var markingColor = 0;
-        let lineItems: JSX.Element[] = [];
-        lines.map((line) => {
+        let image_lines = [];
+        let in_image = false;
+        for (const line of lines) {
+            if (in_image && line !== "END_IMAGE") {
+                image_lines.push(line);
+                continue;
+            }
+            if (in_image && line === "END_IMAGE") {
+                in_image = false;
+                const image = <PPMImage ppm_text={image_lines.join('\n')} key={line + (key++)} />;
+                lineItems.push(image);
+                image_lines = [];
+                continue;
+            }
+            if (line === "IMAGE") {
+                in_image = true;
+                continue;
+            }
             let data: [JSX.Element, number, number] = this.parseLine(line, key++, markingColor);
             if (markingColor !== data[1] && data[2] > interpreterSettings.showUsedTimeWhenAbove
                 && interpreterSettings.showUsedTimeWhenAbove > -1) {
@@ -120,8 +191,7 @@ class Playground extends React.Component<Props, State> {
             }
             markingColor = data[1];
             lineItems.push(data[0]);
-            return 0;
-        });
+        }
         let code: string = this.props.initialCode;
 
         if (this.state.reset) {
@@ -412,6 +482,7 @@ class Playground extends React.Component<Props, State> {
                 line = '@' + line;
             }
         }
+        // let special: "img" | undefined = undefined;
         if (line.startsWith('\\1')) {
             line = line.substring(2);
             markingColor = 1;
@@ -422,6 +493,23 @@ class Playground extends React.Component<Props, State> {
             line = line.substring(2);
             markingColor = 3;
         }
+        // else if (line.startsWith('\\img')) {
+        //     line = line.substring(4);
+        //     markingColor = 1;
+        //     special = "img";
+        // }
+
+        // if (special === "img") {
+        //     let ppm_text = line;
+        //     console.log("PPM TEXT: " + ppm_text);
+        //     return [(
+        //         <img
+        //             // src={items[0]}
+        //             src="https://i.imgur.com/yBSDfQa.jpeg"
+        //             style={{ maxWidth: '100%', maxHeight: '100%' }}
+        //             key={line + (key++)} />
+        //     ), markingColor, executionTime];
+        // }
 
         // Make sure spaces in strings are non-breakable
         line = line.replaceAll(' ', ' '); // second space is nbsp
@@ -482,6 +570,7 @@ class Playground extends React.Component<Props, State> {
                 </pre>
             ), markingColor, executionTime];
         }
+
     }
 }
 
