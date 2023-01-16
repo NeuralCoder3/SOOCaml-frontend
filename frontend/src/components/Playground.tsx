@@ -18,8 +18,6 @@ import ppm from 'ppm';
 import { Readable } from 'stream';
 
 function PPMImage(props: { ppm_text: string }) {
-    // let data = props.ppm.toDataURL();
-    // return <img src={data} alt="PPM Image" />;
 
     let s = new Readable();
     s.push(props.ppm_text);
@@ -33,8 +31,6 @@ function PPMImage(props: { ppm_text: string }) {
             return;
         }
         console.log("data", data);
-        // draw data : Array(Array(R, G, B)))
-        // const canvas = canvas_element as HTMLCanvasElement;
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
         if (ctx === null) {
@@ -62,29 +58,10 @@ function PPMImage(props: { ppm_text: string }) {
         }
         ctx.putImageData(imgData, 0, 0);
         setSource(canvas.toDataURL());
-        // for (let i = 0; i < image_data.length; i++) {
-        //     for (let j = 0; j < image_data[i].length; j++) {
-        //         imgData.data[(i * canvas.width + j) * 4 + 0] = image_data[i][j][0];
-        //         imgData.data[(i * canvas.width + j) * 4 + 1] = image_data[i][j][1];
-        //         imgData.data[(i * canvas.width + j) * 4 + 2] = image_data[i][j][2];
-        //         imgData.data[(i * canvas.width + j) * 4 + 3] = 255;
-        //     }
-        // }
-
-        // canvas.width = data.width;
-        // canvas.height = data.height;
-        // const imgData = ctx.createImageData(data.width, data.height);
-        // for (let i = 0; i < data.data.length; i++) {
-        //     imgData.data[i * 4 + 0] = data.data[i][0];
-        //     imgData.data[i * 4 + 1] = data.data[i][1];
-        //     imgData.data[i * 4 + 2] = data.data[i][2];
-        //     imgData.data[i * 4 + 3] = 255;
-        // }
     });
 
 
     return (<img
-        // src="https://i.imgur.com/yBSDfQa.jpeg"
         src={source}
         style={{ maxWidth: '100%', maxHeight: '100%' }}
     />);
@@ -189,77 +166,7 @@ class Playground extends React.Component<Props, State> {
             }
             if (in_image && line === "END_IMAGE") {
                 in_image = false;
-                // const ppm_text = image_lines.join('\n');
-
-                // const [source, setSource] = React.useState("https://i.imgur.com/yBSDfQa.jpeg");
-                // let src = "https://i.imgur.com/yBSDfQa.jpeg";
-                // let image = new Image();
-                // image.style.maxWidth = '100%';
-                // image.style.maxHeight = '100%';
-                // image.src = "https://i.imgur.com/yBSDfQa.jpeg";
-                // const image =
-                //     <img
-                //         src={src}
-                //         style={{ maxWidth: '100%', maxHeight: '100%' }}
-                //         key={line + (key++)} />;
-
-                // generate a canvas as HTMLCanvasElement
-                // const canvas_element = document.createElement('canvas');
-                // // canvas_element as JSX.Element;
-                // const image =
-                //     <img
-                //         src={canvas_element.toDataURL()}
-                //         style={{ maxWidth: '100%', maxHeight: '100%' }}
-                //         key={line + (key++)} />;
-
                 const image = <PPMImage ppm_text={image_lines.join('\n')} key={line + (key++)} />;
-
-
-                // let s = new Readable();
-                // s.push(image_lines.join('\n'));
-                // s.push(null);
-
-                // ppm.parse(s, (err: any, data: any) => {
-                //     if (err) {
-                //         console.log("error", err);
-                //         return;
-                //     }
-                //     // draw data : Array(Array(R, G, B)))
-                //     const canvas = canvas_element as HTMLCanvasElement;
-                //     const ctx = canvas.getContext('2d');
-                //     if (ctx === null) {
-                //         console.log("error", "no context");
-                //         return;
-                //     }
-                //     let image_data = data as [[number, number, number]];
-                //     canvas.height = image_data.length;
-                //     canvas.width = image_data[0].length;
-                //     let imgData = ctx.createImageData(canvas.width, canvas.height);
-                //     for (let i = 0; i < image_data.length; i++) {
-                //         for (let j = 0; j < image_data[i].length; j++) {
-                //             imgData.data[(i * canvas.width + j) * 4 + 0] = image_data[i][j][0];
-                //             imgData.data[(i * canvas.width + j) * 4 + 1] = image_data[i][j][1];
-                //             imgData.data[(i * canvas.width + j) * 4 + 2] = image_data[i][j][2];
-                //             imgData.data[(i * canvas.width + j) * 4 + 3] = 255;
-                //         }
-                //     }
-                //     // canvas.width = data.width;
-                //     // canvas.height = data.height;
-                //     // const imgData = ctx.createImageData(data.width, data.height);
-                //     // for (let i = 0; i < data.data.length; i++) {
-                //     //     imgData.data[i * 4 + 0] = data.data[i][0];
-                //     //     imgData.data[i * 4 + 1] = data.data[i][1];
-                //     //     imgData.data[i * 4 + 2] = data.data[i][2];
-                //     //     imgData.data[i * 4 + 3] = 255;
-                //     // }
-                // });
-                // setTimeout(() => {
-                //     console.log("timeout");
-                //     // src = "https://i.imgur.com/QOo2nE3.jpeg";
-                //     // image.props.src = "https://i.imgur.com/QOo2nE3.jpeg";
-                //     // image.src = "https://i.imgur.com/QOo2nE3.jpeg";
-                // }, 2000);
-                // lineItems.push(<>{image}</>);
                 lineItems.push(image);
                 image_lines = [];
                 continue;
