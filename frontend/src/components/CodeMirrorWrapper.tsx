@@ -164,7 +164,7 @@ class IncrementalInterpretationHelper {
             }
             if (out_response.startsWith("IMAGE")) {
                 out_response = out_response.replace("IMAGE", "");
-                this.partialOutput += "IMAGE\n" + out_response + "\nEND_IMAGE";
+                this.partialOutput += "IMAGE\n" + out_response + "\nEND_IMAGE\n";
             } else {
                 if (!response.endsWith("\n"))
                     response += "\n";
