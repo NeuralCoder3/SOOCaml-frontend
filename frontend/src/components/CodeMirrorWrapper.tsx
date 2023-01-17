@@ -50,6 +50,8 @@ class IncrementalInterpretationHelper {
     interpreterSettings: string | null;
     initialExtraCode: string | undefined; // Code to be executed before any user code
     afterExtraCode: string | undefined; // Code to be executed after any user code
+    lastExecutedCodeParts: string[];
+    lastOutputParts: string[];
 
     constructor(outputCallback: (code: string, complete: boolean) => any,
         settings: string | null,
@@ -68,6 +70,8 @@ class IncrementalInterpretationHelper {
         this.wasTerminated = true;
         this.partialOutput = '';
         this.timeout = 5000;
+        this.lastExecutedCodeParts = [];
+        this.lastOutputParts = [];
     }
 
     setTimeout(num: number) {
@@ -139,11 +143,41 @@ class IncrementalInterpretationHelper {
 
         let code = codemirror.getValue().trim();
         const endTag = ";;";
-        const parts = code.split(endTag).filter((x: string) => x !== '');
-        this.partialOutput = '';
-        let parity = true;
         // @ts-ignore
-        resetInterpreter();
+        // resetInterpreter();
+
+        const commonPrefix = (a: Iterable, b: Iterable) => {
+            let i = 0;
+            while (i < a.length && i < b.length && a[i] === b[i]) {
+                i++;
+            }
+            return i;
+        };
+
+        const code_parts = code.split(endTag).filter((x: string) => x !== '');
+
+        const last_parts = this.lastExecutedCodeParts;
+        const common_code_length = commonPrefix(last_parts, code_parts);
+        // console.log("common code parts", common_code_length);
+        // console.log("last code parts", last_parts.length);
+        // console.log("new code parts", code_parts.length - common_code_length);
+        const parts = code_parts.slice(common_code_length);
+        // console.log("new code parts test", parts.length);
+        // ignore common code (do not re-execute it)
+        this.lastExecutedCodeParts = code_parts;
+
+        const partialOutputParts = this.lastOutputParts.slice(0, common_code_length);
+        // console.log("copied partial output parts", partialOutputParts.length);
+        let parity = common_code_length % 2 == 0;
+
+        this.partialOutput = "";
+        for (const part of partialOutputParts) {
+            if (parity) {
+                this.partialOutput += part;
+            }
+            this.outputCallback(this.partialOutput, false);
+        }
+
         for (const part of parts) {
             let response = "";
             let out_response = "";
@@ -162,9 +196,16 @@ class IncrementalInterpretationHelper {
                 // response = "" + e;
                 err_response = "" + e;
             }
-            if (out_response.startsWith("IMAGE")) {
-                out_response = out_response.replace("IMAGE", "");
-                this.partialOutput += "IMAGE\n" + out_response + "\nEND_IMAGE\n";
+            let output_part;
+            if (out_response.startsWith("IMAGE") ||
+                out_response.startsWith("P3 ") ||
+                out_response.startsWith("P3\r") ||
+                out_response.startsWith("P3\n")
+            ) {
+                if (out_response.startsWith("IMAGE"))
+                    out_response = out_response.replace("IMAGE", "");
+                output_part = "IMAGE\n" + out_response + "\nEND_IMAGE\n";
+                // console.log("IMAGE output");
             } else {
                 if (!response.endsWith("\n"))
                     response += "\n";
@@ -173,11 +214,17 @@ class IncrementalInterpretationHelper {
                     kind = "3";
                 if (out_response !== "")
                     out_response = "Output: \n" + out_response;
-                this.partialOutput += "\\" + kind + "> " + response + out_response + err_response;
+                output_part = "\\" + kind + "> " + response + out_response + err_response;
             }
+            // partialOutputParts.push(output_part.trim() + "\n");
+            partialOutputParts.push(output_part);
+            this.partialOutput += output_part;
             this.outputCallback(this.partialOutput, false);
             parity = !parity;
         }
+        // this.partialOutput = partialOutputParts.join("");
+        // this.outputCallback(this.partialOutput, false);
+        this.lastOutputParts = partialOutputParts;
         this.outputCallback(this.partialOutput, true);
         this.partialOutput = '';
         if (this.workerTimeout !== null) {
