@@ -158,6 +158,10 @@ class IncrementalInterpretationHelper {
 
         const last_parts = this.lastExecutedCodeParts;
         const common_code_length = commonPrefix(last_parts, code_parts);
+        if (common_code_length === 0) {
+            // @ts-ignore
+            resetInterpreter();
+        }
         // console.log("common code parts", common_code_length);
         // console.log("last code parts", last_parts.length);
         // console.log("new code parts", code_parts.length - common_code_length);
