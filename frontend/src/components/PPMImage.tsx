@@ -6,15 +6,14 @@ const ppm_to_URI = new Map<string, string>();
 
 export function PPMImage(props: { ppm_text: string }) {
 
-  let s = new Readable();
-  s.push(props.ppm_text);
-  s.push(null);
-
   const [source, setSource] = React.useState<string>("https://i.imgur.com/epMSRQH.png");
   useEffect(() => {
     if (ppm_to_URI.has(props.ppm_text)) {
       setSource(ppm_to_URI.get(props.ppm_text) as string);
     } else {
+      let s = new Readable();
+      s.push(props.ppm_text);
+      s.push(null);
       ppm.parse(s, (err: any, data: any) => {
         if (err) {
           console.log("error", err);
@@ -55,6 +54,7 @@ export function PPMImage(props: { ppm_text: string }) {
 
   return (<img
     src={source}
+    alt="Generated PPM"
     style={{ maxWidth: '100%', maxHeight: '100%' }}
   />);
 }
