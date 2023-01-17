@@ -163,6 +163,7 @@ class IncrementalInterpretationHelper {
         // console.log("new code parts", code_parts.length - common_code_length);
         const parts = code_parts.slice(common_code_length);
         // console.log("new code parts test", parts.length);
+        console.log("(last " + last_parts.length + ") (new " + parts.length + ") (common " + common_code_length + ")");
         // ignore common code (do not re-execute it)
         this.lastExecutedCodeParts = code_parts;
 
@@ -222,8 +223,8 @@ class IncrementalInterpretationHelper {
             this.outputCallback(this.partialOutput, false);
             parity = !parity;
         }
-        // this.partialOutput = partialOutputParts.join("");
-        // this.outputCallback(this.partialOutput, false);
+        this.partialOutput = partialOutputParts.join("");
+        this.outputCallback(this.partialOutput, false);
         this.lastOutputParts = partialOutputParts;
         this.outputCallback(this.partialOutput, true);
         this.partialOutput = '';
