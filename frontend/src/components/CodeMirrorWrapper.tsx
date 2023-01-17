@@ -168,7 +168,7 @@ class IncrementalInterpretationHelper {
 
         const partialOutputParts = this.lastOutputParts.slice(0, common_code_length);
         // console.log("copied partial output parts", partialOutputParts.length);
-        let parity = common_code_length % 2 == 0;
+        let parity = common_code_length % 2 === 0;
 
         this.partialOutput = "";
         for (const part of partialOutputParts) {
@@ -233,42 +233,6 @@ class IncrementalInterpretationHelper {
         }
         return;
 
-        if (this.wasTerminated) { // Re-evaluate everything
-            added = codemirror.getValue().split('\n');
-            removed = [];
-            pos = { line: 0, ch: 0 };
-            this.wasTerminated = false;
-            this.worker.postMessage({
-                type: 'settings',
-                data: this.interpreterSettings
-            });
-            if (this.initialExtraCode !== undefined) {
-                if (!getInterfaceSettings().hideBeforeCodeResult) {
-                    this.worker.postMessage({
-                        type: 'initial',
-                        data: this.initialExtraCode
-                    });
-                } else {
-                    this.worker.postMessage({
-                        type: 'initialSilent',
-                        data: this.initialExtraCode
-                    });
-                }
-            }
-            this.worker.postMessage({
-                type: 'afterCode',
-                data: this.afterExtraCode
-            });
-        }
-        this.worker.postMessage({
-            type: 'interpret',
-            data: {
-                'pos': pos,
-                'added': added,
-                'removed': removed,
-            }
-        });
-        this.startTimeout();
     }
 
     private startTimeout() {
