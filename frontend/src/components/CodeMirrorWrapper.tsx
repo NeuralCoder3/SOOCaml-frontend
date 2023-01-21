@@ -174,8 +174,10 @@ class IncrementalInterpretationHelper {
         const partialOutputParts = this.lastOutputParts.slice(0, common_code_length);
         // console.log("copied partial output parts", partialOutputParts.length);
         let parity = common_code_length % 2 === 0;
+        let current_line = 0;
 
         this.partialOutput = "";
+        current_line += code_parts.slice(0, common_code_length).map((x: string) => x.split("\n").length - 1).reduce((a: number, b: number) => a + b, 0);
         for (const part of partialOutputParts) {
             if (parity) {
                 this.partialOutput += part;
@@ -215,8 +217,13 @@ class IncrementalInterpretationHelper {
                 if (!response.endsWith("\n"))
                     response += "\n";
                 let kind = parity ? "1" : "2";
-                if (response.includes("Error") || err_response !== "")
+                if (response.includes("Error") || err_response !== "") {
                     kind = "3";
+                    // add current_line to each occurence Line [n]
+                    err_response = err_response.replace(/Line \d+/g, (match: string) => {
+                        return "Line " + (current_line + parseInt(match.split(" ")[1]));
+                    });
+                }
                 if (out_response !== "")
                     out_response = "Output: \n" + out_response;
                 output_part = "\\" + kind + "> " + response + out_response + err_response;
@@ -226,7 +233,9 @@ class IncrementalInterpretationHelper {
             this.partialOutput += output_part;
             this.outputCallback(this.partialOutput, false);
             parity = !parity;
+            current_line += part.split("\n").length - 1;
         }
+        console.log(current_line);
         this.partialOutput = partialOutputParts.join("");
         this.outputCallback(this.partialOutput, false);
         this.lastOutputParts = partialOutputParts;
