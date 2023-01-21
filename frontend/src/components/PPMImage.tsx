@@ -37,10 +37,20 @@ export function PPMImage(props: { ppm_text: string }) {
           for (let j = 0; j < image_data[i].length; j++) {
             for (let k = 0; k < zoom; k++) {
               for (let l = 0; l < zoom; l++) {
-                imgData.data[((i * zoom + k) * canvas.width + j * zoom + l) * 4 + 0] = image_data[i][j][0];
-                imgData.data[((i * zoom + k) * canvas.width + j * zoom + l) * 4 + 1] = image_data[i][j][1];
-                imgData.data[((i * zoom + k) * canvas.width + j * zoom + l) * 4 + 2] = image_data[i][j][2];
-                imgData.data[((i * zoom + k) * canvas.width + j * zoom + l) * 4 + 3] = 255;
+                const r = image_data[i][j][0];
+                const g = image_data[i][j][1];
+                const b = image_data[i][j][2];
+                let a;
+                // transparentize magenta
+                if (r === 255 && g === 0 && b === 255) {
+                  a = 0;
+                } else {
+                  a = 255;
+                }
+                imgData.data[((i * zoom + k) * canvas.width + j * zoom + l) * 4 + 0] = r;
+                imgData.data[((i * zoom + k) * canvas.width + j * zoom + l) * 4 + 1] = g;
+                imgData.data[((i * zoom + k) * canvas.width + j * zoom + l) * 4 + 2] = b;
+                imgData.data[((i * zoom + k) * canvas.width + j * zoom + l) * 4 + 3] = a;
               }
             }
           }
