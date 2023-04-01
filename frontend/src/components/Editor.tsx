@@ -69,9 +69,25 @@ class Editor extends React.Component<any, State> {
     }
 
     componentDidMount() {
+
         if (this.props.location && this.props.location.search) {
-            let parts = this.props.location.search.split(/[?|&]/);
-            let dfn = decodeURI(this.props.location.search.substr(2 + parts[1].length));
+            let search_str = this.props.location.search;
+            let parts = search_str.split(/[?|&]/);
+            // find part code=
+            // if found decode, set initialCode, return
+            for (let i = 0; i < parts.length; i++) {
+                if (parts[i].startsWith('code=')) {
+                    let dfn = decodeURI(parts[i].substr("code=".length));
+                    this.setState((oldState) => {
+                        return {
+                            initialCode: dfn
+                        };
+                    });
+                    return;
+                }
+            }
+
+            let dfn = decodeURI(search_str.substr(2 + parts[1].length));
 
             if (parts.length < 2 || isNaN(+parts[1])) {
                 // Not a valid GRFSD, don't do anything
@@ -94,6 +110,24 @@ class Editor extends React.Component<any, State> {
             });
             return;
         }
+
+        // if url is #code=..., load code
+        if (this.props.location && this.props.location.hash) {
+            let hash_str = this.props.location.hash;
+            let parts = hash_str.split(/[#|&]/);
+            for (let i = 0; i < parts.length; i++) {
+                if (parts[i].startsWith('code=')) {
+                    let dfn = decodeURI(parts[i].substr("code=".length));
+                    this.setState((oldState) => {
+                        return {
+                            initialCode: dfn
+                        };
+                    });
+                    return;
+                }
+            }
+        }
+
 
         if (this.props.history && this.props.history.location.state) {
             let state: any = this.props.history.location.state;

@@ -25,13 +25,14 @@
         "react-router": "^5.2.0",
         "react-router-bootstrap": "^0.25.0",
         "react-router-dom": "^5.2.0",
-        "react-scripts": "^3.4.4"
+        "react-scripts": "^3.4.4",
+        "ts-node": "^10.9.0"
     },
     "scripts": {
         "predeploy": "npm run build",
         "deploy": "gh-pages -d build",
-        "start": "npm run version-ts; react-scripts start",
-        "build": "npm run version-ts; react-scripts build; workbox generateSW workbox-config.js && precompress build",
+        "start": "npm run version-ts; react-scripts --openssl-legacy-provider start",
+        "build": "npm run version-ts; react-scripts --openssl-legacy-provider build; workbox generateSW workbox-config.js && precompress build",
         "test": "react-scripts test --env=jsdom",
         "version-ts": "echo \"export const REF_NAME = '${CI_COMMIT_REF_NAME}';\nexport const COMMIT_SHA = '`git rev-parse --short HEAD`';\nexport const PIPELINE_ID = '${CI_PIPELINE_ID}';\nexport const BUILD_DATE = '`date --utc`';\" > ./src/components/Version.tsx"
     },
@@ -40,7 +41,7 @@
         "gh-pages": "^4.0.0",
         "precompress": "^6.3.2",
         "tslint": "^5.0.0",
-        "typescript": "^3.9.7",
+        "typescript": "^4.9.4",
         "workbox-cli": "^4.3.1"
     },
     "browserslist": {

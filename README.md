@@ -1,6 +1,6 @@
 # OCaml Version of SOSML
 
-Note: The website with server backing is http://89.58.5.223/ (new: http://soocaml.ultrasrv.de/).
+Note: The website with server backing is http://89.58.5.223/ (v2202201167307177506.ultrasrv.de).
 
 The goal is to update SOSML to support OCaml.
 
@@ -46,6 +46,14 @@ Information about the SOSML projects:
 Note: 
 The npm commands might need `export NODE_OPTIONS=--openssl-legacy-provider`.
 
+## Special Features
+
+* StdOut that contains a ppm image is automatically displayed.
+  - PPM Images need to start with "P3\n[remaining]" or "IMAGE\n[PPM content]"
+  - Magenta `(1.0,0.0,1.0)` is rendered as transparent
+* Shared Libraries like Image with `eval_image ?(wh=(256,256)) name img : ()` are automatically included.
+
+
 # SOSML - Frontend
 
 A frontend for SOSML, used by sosml.org, that has different themes (with dark mode
@@ -57,7 +65,7 @@ support) and allows for saving SML code in the browser.
 
 Node.JS version 8 or higher and NPM version 5 or higher need to be installed on the system. GNU+Linux is recommended.
 ```
-git clone https://github.com/SOSML/SOSML-frontend.git
+git clone https://github.com/NeuralCoder3/SOOCaml-frontend.git
 ```
 
 ## Install/Update all NPM dependencies
