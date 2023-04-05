@@ -77,7 +77,7 @@ class Editor extends React.Component<any, State> {
             // if found decode, set initialCode, return
             for (let i = 0; i < parts.length; i++) {
                 if (parts[i].startsWith('code=')) {
-                    let dfn = decodeURI(parts[i].substr("code=".length));
+                    let dfn = decodeURIComponent(parts[i].substr("code=".length));
                     this.setState((oldState) => {
                         return {
                             initialCode: dfn
@@ -117,7 +117,7 @@ class Editor extends React.Component<any, State> {
             let parts = hash_str.split(/[#|&]/);
             for (let i = 0; i < parts.length; i++) {
                 if (parts[i].startsWith('code=')) {
-                    let dfn = decodeURI(parts[i].substr("code=".length));
+                    let dfn = decodeURIComponent(parts[i].substr("code=".length));
                     this.setState((oldState) => {
                         return {
                             initialCode: dfn
