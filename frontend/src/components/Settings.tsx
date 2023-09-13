@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { CardDeck } from 'react-bootstrap';
+// import { CardDeck } from 'react-bootstrap';
+import { Container} from 'react-bootstrap';
 
 import { REF_NAME, COMMIT_SHA, PIPELINE_ID, BUILD_DATE } from './Version';
 import { getColor, getTheme } from '../theme';
@@ -343,9 +344,12 @@ class Settings extends React.Component<any, State> {
             );
         }
         result.push(
-            <CardDeck key={17}>
+            // <CardDeck key={17}>
+            //     {themeCards}
+            // </CardDeck>
+            <Container key={17}>
                 {themeCards}
-            </CardDeck>
+            </Container>
         )
 
         result.push(

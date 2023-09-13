@@ -294,7 +294,9 @@ class Editor extends React.Component<any, State> {
             style.maxWidth = this.state.width - 220;
 
             fileForm = (
-                <Form inline={true} className="inlineBlock" onSubmit={this.handleFormSubmit}>
+                <Form 
+                // inline={true} 
+                className="inlineBlock" onSubmit={this.handleFormSubmit}>
                     <input className="form-control" type="text"
                         value={this.state.fileName} onChange={this.handleFileNameChange}
                         style={style} placeholder="File name" />

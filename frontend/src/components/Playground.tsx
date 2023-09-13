@@ -371,7 +371,7 @@ class Playground extends React.Component<Props, State> {
             // We have the user's soul, so we can get "energy"
             WebserverAPI.shareCode(this.state.code).then((hash) => {
                 this.setState(prevState => {
-                    return { shareLink: window.location.host + '/share/' + hash };
+                    return { shareLink: window.location.host + '/soocaml/share/' + hash };
                 });
 
                 // Store the share file locally

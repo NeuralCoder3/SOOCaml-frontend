@@ -57,7 +57,7 @@ class RootPage extends React.Component<any, any> {
             // <Router basename={ROUTE_BASENAME}>
             // TODO: handle using webpack
             // <Router basename={"/SOOCaml-frontend"}>
-            <Router>
+            <Router basename={"/soocaml"}>
                 <div className="rootPage">
                     <style>{theme}</style>
                     <MenuBar />

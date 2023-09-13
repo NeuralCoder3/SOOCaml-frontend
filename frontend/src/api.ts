@@ -8,6 +8,22 @@ import { WishSeries } from './wishes';
 
 const LAST_SHARE_TIMEOUT = 15000;
 
+// overwrite fetch
+
+// function fetch(url: string, options: any) {
+// }
+
+const fetch = function(input: RequestInfo, init?: RequestInit): Promise<Response> {
+    console.log('fetching ' + input);
+    if (typeof input === 'string') {
+        if (input.startsWith('/')) {
+            input = "/soocaml" + input;
+            console.log('redirected fetching ' + input);
+        }
+    }
+    return window.fetch(input, init);
+};
+
 export class API {
     static EMULATE: boolean = false;
     static LAST_SHARE: Date | undefined;

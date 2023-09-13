@@ -410,7 +410,7 @@ class Files extends React.Component<any, State> {
     private linkHandlerFor(file: File): (evt: any) => void {
         return (evt: any) => {
             this.setState({
-                shareLink: window.location.origin + '/share/' + file.name
+                shareLink: window.location.origin + '/soocaml/share/' + file.name
             });
             evt.stopPropagation();
         };
