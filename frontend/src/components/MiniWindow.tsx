@@ -32,7 +32,13 @@ class MiniWindow extends React.Component<Props, State> {
             if (width < 100) {
                 collapseStatus = true;
             }
+            // this.mainInstance.scrollTo(0, this.mainInstance.clientHeight);
             this.setState({collapseStatus});
+            // scroll to bottom
+            // this.mainInstance.scrollIntoView(false);
+            // this.props.content.scrollIntoView(false);
+            // this.mainInstance.scrollTo(0, 100000);
+
         }
     }
 

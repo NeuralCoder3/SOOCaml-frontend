@@ -1,6 +1,13 @@
 import ppm from 'ppm';
 import React, { useEffect } from 'react';
-import { Readable } from 'stream';
+// @ts-ignore
+import { Readable } from 'readable-stream';
+// import { Stream } from 'stream';
+// import Streamify from 'streamify-string';
+import { Buffer } from 'buffer';
+
+// @ts-ignore
+window.Buffer = Buffer;
 
 const ppm_to_URI = new Map<string, string>();
 
@@ -14,6 +21,12 @@ export function PPMImage(props: { ppm_text: string }) {
       let s = new Readable();
       s.push(props.ppm_text);
       s.push(null);
+
+      // create string stream withour stream
+      
+      // const s = new ReadableStream(props.ppm_text);
+      // @ts-ignore
+      // const s = Streamify(props.ppm_text);
       ppm.parse(s, (err: any, data: any) => {
         if (err) {
           console.log("error", err);

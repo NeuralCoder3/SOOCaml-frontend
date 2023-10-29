@@ -122,6 +122,27 @@ class Landing extends React.Component<any, any> {
                 {sharingH}
                 {sharing}
 
+                <h3>Custom Features!</h3>
+                <div className="selectable">
+                    SOOCaml has a few additional features build in that are usually not part of OCaml.
+                    The sample file image.ml are automatically preloaded into the editor scope.
+                    Images in PPM format (starting with IMAGE or P3) are automatically recognized and rendered.
+                    You can try it yourself with the following code:
+                    <pre>
+                        eval_image "Test" (fun (x,y) -&gt; (x,y,0.0))
+                    </pre>
+
+                    There is a special load directive to load OCaml files from the internet.
+                    <pre>
+                        #url "https://raw.githubusercontent.com/avsm/hello-world-action-ocaml/master/hello.ml";;
+                    </pre>
+                    will load the file hello.ml from github and evaluate it.
+                    Shared files need the api url
+                    <pre>
+                        #url "https://cdltools.cs.uni-saarland.de/soocaml/api/share/[longnumberchain]";;
+                    </pre>
+                </div>
+
                 <button className="btn btn-suc-alt" onClick={this.handleRedirectToEdit}
                     style={style} type="button">
                     <span className="glyphicon glyphicon-pencil" />&nbsp;Take me to the editor.
