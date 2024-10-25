@@ -2,6 +2,7 @@ html {
     font-family: sans-serif;
     -webkit-text-size-adjust: 100%;
     -ms-text-size-adjust: 100%;
+    overscroll-behavior-y: none;
 }
 
 article,aside,details,figcaption,figure,leftfooter,footer,header,hgroup,main,menu,nav,section,summary {
