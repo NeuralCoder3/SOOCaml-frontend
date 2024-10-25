@@ -226,7 +226,7 @@ class Playground extends React.Component<Props, State> {
         let output = (
             <div className="flexcomponent flexy">
                 <MiniWindow content={
-                    <div>
+                    <div id="OutputItems">
                         {lineItems}
                     </div>
                 } title="Output" className="flexy" updateAnchor={this.state.sizeAnchor} />
@@ -360,6 +360,12 @@ class Playground extends React.Component<Props, State> {
         if (this.props.outputCallback !== undefined) {
             this.props.outputCallback(newOutput, complete);
         }
+        // hack to scroll output to bottom
+        setTimeout(() => {
+            console.log('scrolling');
+            // @ts-ignore
+            document.getElementById("OutputItems").parentElement.scrollTo(0,1000000);
+        }, 500);
     }
 
     handleShareWrapper() {

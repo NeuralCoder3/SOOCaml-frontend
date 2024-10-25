@@ -55,6 +55,9 @@ class IncrementalInterpretationHelper {
     afterExtraCode: string | undefined; // Code to be executed after any user code
     lastExecutedCodeParts: string[];
     lastOutputParts: string[];
+    currentlyExecuting: boolean;
+    waitingForExecution: boolean;
+    website_cache: {[key: string]: string};
 
     constructor(outputCallback: (code: string, complete: boolean) => any,
         settings: string | null,
@@ -62,10 +65,13 @@ class IncrementalInterpretationHelper {
         afterCode: string | undefined = undefined) {
         this.interpreterSettings = settings;
         this.disabled = false;
+        this.currentlyExecuting = false;
         this.outputCallback = outputCallback;
         this.initialExtraCode = initialCode;
         this.afterExtraCode = afterCode;
+        this.waitingForExecution = false;
         this.markers = {};
+        this.website_cache = {};
 
         this.worker = new Worker(process.env.PUBLIC_URL + '/webworker.js');
         this.exworker = new Worker(process.env.PUBLIC_URL + '/executeWorker.js');
@@ -141,7 +147,60 @@ class IncrementalInterpretationHelper {
         this.disabled = false;
     }
 
+    async lookupWebsite(url: string): Promise<string> {
+        if (this.website_cache[url] !== undefined) {
+            return this.website_cache[url];
+        }
+        let lookupUrl = url;
+        if (!lookupUrl.startsWith("http://") && !lookupUrl.startsWith("https://")) {
+            // TODO: compute url instead of hardcoding
+            lookupUrl = "https://cdltools.cs.uni-saarland.de/soocaml/api/code/" + lookupUrl;
+        }
+        if(lookupUrl.startsWith("https://cdltools.cs.uni-saarland.de/soocaml/share/")) {
+            lookupUrl = lookupUrl.replace(
+                "https://cdltools.cs.uni-saarland.de/soocaml/share/", 
+                "https://cdltools.cs.uni-saarland.de/soocaml/api/share/");
+        }
+        console.log("lookup website", lookupUrl);
+        const response = await fetch(lookupUrl);
+        const text = await response.text();
+        this.website_cache[url] = text;
+        return text;
+    }
+
+    async replaceWebsite(code: string): Promise<string> {
+        // find all #url "[url]" or #use "[url]"
+        // replace them with the content of the url
+        // do this recursively until no more #url or #use is found
+        let new_code = code;
+        
+        let found = true;
+        const patterns = [
+            /#url\s*\"(.*)\"/g,
+            /#use\s*\"(.*)\"/g,
+        ];
+        while (found) {
+            found = false;
+            for (const pattern of patterns) {
+                let matches = new_code.matchAll(pattern);
+                for (const match of matches) {
+                    found = true;
+                    const url = match[1];
+                    const replacement = await this.lookupWebsite(url);
+                    new_code = new_code.replace(match[0], replacement);
+                    // console.log("replaced", match[0], "with", replacement)
+                }
+            }
+        }
+        return new_code;
+    }
+
+
     async executeTimeWrapped(code: string): Promise<string[]> {
+        if (this.currentlyExecuting) {
+            console.log("already executing");
+            return ['','','already executing\n'];
+        }
         // run execute(code) in a separate thread and kill it after 5s
         // without worker
         // const p = new Promise<string[]>((resolve, reject) => {
@@ -173,34 +232,37 @@ class IncrementalInterpretationHelper {
         // if execCode starts with 
         // #url "[url]"
         // load the file from the url and set execCode to the content
-        if (execCode.trim().startsWith("#url") && 
-            execCode.trim().replace(" ","").replace("\n","").replace("\r","").endsWith("\";;")
-        ) {
-            console.log("load code from url", execCode);
-            // remove #url, trim, remove first ", get until next "
-            const codeurl = execCode.trim().slice(4).trim().slice(1).split('"')[0];
-            console.log("load code from url", codeurl)
-            const response = await fetch(codeurl);
-            execCode = await response.text();
-            console.log("loaded code from url", execCode);
-            execCode += ";;";
-        }
+        execCode = await this.replaceWebsite(execCode);
+        // if (execCode.trim().startsWith("#url") && 
+        //     execCode.trim().replace(" ","").replace("\n","").replace("\r","").endsWith("\";;")
+        // ) {
+        //     // console.log("load code from url", execCode);
+        //     // // remove #url, trim, remove first ", get until next "
+        //     // const codeurl = execCode.trim().slice(4).trim().slice(1).split('"')[0];
+        //     // console.log("load code from url", codeurl)
+        //     // const response = await fetch(codeurl);
+        //     // execCode = await response.text();
+        //     // console.log("loaded code from url", execCode);
+        //     // execCode += ";;";
+        // }
 
         let finished = false;
         const wrapper = this;
+        wrapper.currentlyExecuting = true;
         const current_time = wrapper.lastExecutionTime;
         console.log("invoke execution");
         const p = new Promise<string[]>((resolve, reject) => {
             setTimeout(() => {
                 if (finished) {
-                    console.log("timeout but finished");
+                    // console.log("timeout but finished");
                     return;
                 }
                 finished = true;
                 wrapper.exworker.terminate();
                 wrapper.exworker = new Worker(process.env.PUBLIC_URL + '/executeWorker.js');
                 wrapper.lastExecutedCodeParts = [];
-                resolve(['', '', 'timeout']);
+                wrapper.currentlyExecuting = false;
+                resolve(['', '', 'timeout\n']);
                 // this.resetExecutor();
             },this.timeout);
             this.exworker.onmessage = (e: any) => {
@@ -213,10 +275,12 @@ class IncrementalInterpretationHelper {
                         return;
                     }
                     finished = true;
+                    wrapper.currentlyExecuting = false;
                     // TODO: only if time received not < lastExecuted
                     resolve(message.data);
                 }else if (message.type=="error") {
                     finished = true;
+                    wrapper.currentlyExecuting = false;
                     // throw message.data;
                     resolve(['', '', message.data]);
                 } else {
@@ -250,14 +314,18 @@ class IncrementalInterpretationHelper {
     async resetExecutor() {
         // this.lastExecutedCodeParts = [];
         // resetInterpreter();
+        this.currentlyExecuting = true;
+        const wrapper = this;
         console.log("invoke reset", this.exworker);
         const p = new Promise<boolean>((resolve, reject) => {
             setTimeout(() => {
+                wrapper.currentlyExecuting = false;
                 resolve(false);
             }, 1000);
             this.exworker.onmessage = (e: any) => {
                 if(e.data.type == "reset") {
                     console.log("reset done");
+                    wrapper.currentlyExecuting = false;
                     resolve(true);
                 }
             }
@@ -280,9 +348,24 @@ class IncrementalInterpretationHelper {
             // || !added.includes(";")) {
             && !added.includes(";")) {
             // console.log("too soon");
-            window.setTimeout(() => {
-                this.handleChangeAt(pos, added, removed, codemirror);
-            }, this.executionWaitTime);
+            if (!this.waitingForExecution) {
+                this.waitingForExecution = true;
+                window.setTimeout(() => {
+                    this.waitingForExecution = false;
+                    this.handleChangeAt(pos, added, removed, codemirror);
+                }, this.executionWaitTime);
+            }
+            return;
+        }
+        if(this.currentlyExecuting) {
+            console.log("already executing");
+            if (!this.waitingForExecution) {
+                this.waitingForExecution = true;
+                window.setTimeout(() => {
+                    this.waitingForExecution = false;
+                    this.handleChangeAt(pos, added, removed, codemirror);
+                }, this.executionWaitTime);
+            }
             return;
         }
         this.lastExecutionTime = current_time;
@@ -335,7 +418,7 @@ class IncrementalInterpretationHelper {
 
         const last_parts = this.lastExecutedCodeParts;
         const common_code_length = commonPrefix(last_parts, code_parts);
-        if (common_code_length === 0) {
+        if (common_code_length === 0 && this.lastExecutedCodeParts.length > 1) {
             // @ts-ignore
             // resetInterpreter();
             await this.resetExecutor();
