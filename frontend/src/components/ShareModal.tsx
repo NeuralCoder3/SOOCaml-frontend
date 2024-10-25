@@ -20,6 +20,7 @@ class ShareModal extends React.Component<Props, any> {
     }
 
     render() {
+        const link = this.props.link.startsWith('http') ? this.props.link : 'https://' + this.props.link;
         if (!this.props.error) {
             let style: any = {};
             style.margin = '10px 0 0 0';
@@ -29,10 +30,10 @@ class ShareModal extends React.Component<Props, any> {
                         <Modal.Title>Share Link Creation Successful</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
-                        <QRCode link={this.props.link}/>
+                        <QRCode link={link}/>
                         <div className="input-group">
                             <input type="text" className="form-control js-copytextarea"
-                                value={this.props.link} readOnly={true}/>
+                                value={link} readOnly={true}/>
                             <span className="input-group-btn">
                                 <button className="btn btn-def-alt" onClick={this.copyShareLink} type="button">
                                     <span className="glyphicon glyphicon-copy" />

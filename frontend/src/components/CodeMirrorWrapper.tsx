@@ -42,9 +42,12 @@ class IncrementalInterpretationHelper {
     outputCallback: (code: string, complete: boolean) => any;
     disabled: boolean;
     worker: Worker;
+    exworker: Worker;
     codemirror: CodeMirrorSubset;
     workerTimeout: any;
     timeout: number;
+    lastExecutionTime: number;
+    executionWaitTime: number;
     wasTerminated: boolean;
     partialOutput: string;
     interpreterSettings: string | null;
@@ -65,11 +68,14 @@ class IncrementalInterpretationHelper {
         this.markers = {};
 
         this.worker = new Worker(process.env.PUBLIC_URL + '/webworker.js');
+        this.exworker = new Worker(process.env.PUBLIC_URL + '/executeWorker.js');
         this.worker.onmessage = this.onWorkerMessage.bind(this);
         this.workerTimeout = null;
         this.wasTerminated = true;
         this.partialOutput = '';
         this.timeout = 5000;
+        this.executionWaitTime = 500;
+        this.lastExecutionTime = 0;
         this.lastExecutedCodeParts = [];
         this.lastOutputParts = [];
     }
@@ -81,6 +87,7 @@ class IncrementalInterpretationHelper {
     restartWorker() {
         this.worker.terminate();
         this.worker = new Worker(process.env.PUBLIC_URL + '/webworker.js');
+        // this.worker = new Worker(process.env.PUBLIC_URL + '/executeWorker.js');
         this.worker.onmessage = this.onWorkerMessage.bind(this);
     }
 
@@ -134,14 +141,156 @@ class IncrementalInterpretationHelper {
         this.disabled = false;
     }
 
-    handleChangeAt(pos: any, added: string[], removed: string[], codemirror: CodeMirrorSubset) {
+    async executeTimeWrapped(code: string): Promise<string[]> {
+        // run execute(code) in a separate thread and kill it after 5s
+        // without worker
+        // const p = new Promise<string[]>((resolve, reject) => {
+        //     setTimeout(() => {
+        //         reject(['','','timeout']);
+        //     // }, this.timeout);
+        //     }, 5000);
+        //     try {
+        //         // @ts-ignore
+        //         resolve(execute(code));
+        //     } catch (e) {
+        //         reject(e);
+        //     }
+        // });
+        // return p;
+
+        // const p = new Promise<string[]>((resolve,reject) => {
+        //     // @ts-ignore
+        //     resolve(execute(code));
+        // });
+        // return p;
+
+        // with worker
+        // const worker = new Worker(process.env.PUBLIC_URL + '/executeWorker.js');
+        // setTimeout(() => {worker.terminate()}, this.timeout);
+        // worker.postMessage(code);
+
+        let execCode = code;
+        // if execCode starts with 
+        // #url "[url]"
+        // load the file from the url and set execCode to the content
+        if (execCode.trim().startsWith("#url") && 
+            execCode.trim().replace(" ","").replace("\n","").replace("\r","").endsWith("\";;")
+        ) {
+            console.log("load code from url", execCode);
+            // remove #url, trim, remove first ", get until next "
+            const codeurl = execCode.trim().slice(4).trim().slice(1).split('"')[0];
+            console.log("load code from url", codeurl)
+            const response = await fetch(codeurl);
+            execCode = await response.text();
+            console.log("loaded code from url", execCode);
+            execCode += ";;";
+        }
+
+        let finished = false;
+        const wrapper = this;
+        const current_time = wrapper.lastExecutionTime;
+        console.log("invoke execution");
+        const p = new Promise<string[]>((resolve, reject) => {
+            setTimeout(() => {
+                if (finished) {
+                    console.log("timeout but finished");
+                    return;
+                }
+                finished = true;
+                wrapper.exworker.terminate();
+                wrapper.exworker = new Worker(process.env.PUBLIC_URL + '/executeWorker.js');
+                wrapper.lastExecutedCodeParts = [];
+                resolve(['', '', 'timeout']);
+                // this.resetExecutor();
+            },this.timeout);
+            this.exworker.onmessage = (e: any) => {
+                if(finished)
+                    return;
+                const message = e.data;
+                console.log("exec message", message);
+                if (message.type=="result")  {
+                    if (message.time != current_time) {
+                        return;
+                    }
+                    finished = true;
+                    // TODO: only if time received not < lastExecuted
+                    resolve(message.data);
+                }else if (message.type=="error") {
+                    finished = true;
+                    // throw message.data;
+                    resolve(['', '', message.data]);
+                } else {
+                    return
+                }
+
+                // switch(message.type) {
+                //     case "result":
+                //         resolve(message.data);
+                //         break;
+                //     case "error":
+                //         throw message.data;
+                //     default:
+                //         throw "unknown message type";
+                // }
+            }
+            this.exworker.postMessage({
+                type: 'code',
+                data: execCode,
+                time: current_time
+            });
+        });
+        //     setTimeout(() => {resolve(['','','timeout'])}, this.timeout);
+        //     worker.onmessage = (e: any) => {
+        //         const message = e.data;
+        //         resolve(message);
+        //     };
+        return p;
+    }
+
+    async resetExecutor() {
+        // this.lastExecutedCodeParts = [];
+        // resetInterpreter();
+        console.log("invoke reset", this.exworker);
+        const p = new Promise<boolean>((resolve, reject) => {
+            setTimeout(() => {
+                resolve(false);
+            }, 1000);
+            this.exworker.onmessage = (e: any) => {
+                if(e.data.type == "reset") {
+                    console.log("reset done");
+                    resolve(true);
+                }
+            }
+            this.exworker.postMessage({
+                type: 'reset',
+            });
+        });
+        return p;
+    }
+
+    async handleChangeAt(pos: any, added: string[], removed: string[], codemirror: CodeMirrorSubset) {
         if (this.disabled) {
             return;
         }
         this.codemirror = codemirror;
+        // console.log("handleChangeAt, added: ", added);
+
+        const current_time = Date.now();
+        if (current_time - this.lastExecutionTime < this.executionWaitTime 
+            // || !added.includes(";")) {
+            && !added.includes(";")) {
+            // console.log("too soon");
+            window.setTimeout(() => {
+                this.handleChangeAt(pos, added, removed, codemirror);
+            }, this.executionWaitTime);
+            return;
+        }
+        this.lastExecutionTime = current_time;
 
 
         let code = codemirror.getValue().trim();
+        const commentStart = "(*";
+        const commentEnd = "*)";
         const endTag = ";;";
         // @ts-ignore
         // resetInterpreter();
@@ -154,20 +303,50 @@ class IncrementalInterpretationHelper {
             return i;
         };
 
-        const code_parts = code.split(endTag).filter((x: string) => x !== '');
+        // const code_parts = code.split(endTag).filter((x: string) => x !== '');
+        let code_parts : string[] = [];
+        // split at ;; but ignore inside (possibly nested) comments
+        let current_part = "";
+        let comment_level = 0;
+        for (let i = 0; i < code.length; i++) {
+            if (code.startsWith(commentStart, i)) {
+                comment_level++;
+                i += commentStart.length - 1;
+                current_part += commentStart;
+            } else if (code.startsWith(commentEnd, i)) {
+                comment_level--;
+                i += commentEnd.length - 1;
+                current_part += commentEnd;
+            } else if (code.startsWith(endTag, i) && comment_level === 0) {
+                code_parts.push(current_part);
+                current_part = "";
+                i += endTag.length - 1;
+            } else {
+                current_part += code[i];
+            }
+        }
+        if (current_part !== "") {
+            code_parts.push(current_part);
+        }
+        code_parts = code_parts.filter((x: string) => x !== '');
+        // console.log("code parts", code_parts.length);
+        // console.log("code parts", code_parts);
+
 
         const last_parts = this.lastExecutedCodeParts;
         const common_code_length = commonPrefix(last_parts, code_parts);
         if (common_code_length === 0) {
             // @ts-ignore
-            resetInterpreter();
+            // resetInterpreter();
+            await this.resetExecutor();
+            console.log("finished reset");
         }
         // console.log("common code parts", common_code_length);
         // console.log("last code parts", last_parts.length);
         // console.log("new code parts", code_parts.length - common_code_length);
         const parts = code_parts.slice(common_code_length);
         // console.log("new code parts test", parts.length);
-        console.log("(last " + last_parts.length + ") (new " + parts.length + ") (common " + common_code_length + ")");
+        // console.log("(last " + last_parts.length + ") (new " + parts.length + ") (common " + common_code_length + ")");
         // ignore common code (do not re-execute it)
         this.lastExecutedCodeParts = code_parts;
 
@@ -191,9 +370,9 @@ class IncrementalInterpretationHelper {
             let err_response = "";
             // @ts-ignore
             try {
-                // @ts-ignore
                 // response = evaluator.execute(part + endTag);
-                const responses = execute(part + endTag);
+                // strictly force kill after timeout
+                const responses = await this.executeTimeWrapped(part + endTag);
                 response = responses[0];
                 out_response = responses[1];
                 err_response = responses[2];
@@ -235,7 +414,7 @@ class IncrementalInterpretationHelper {
             parity = !parity;
             current_line += part.split("\n").length - 1;
         }
-        console.log(current_line);
+        // console.log(current_line);
         this.partialOutput = partialOutputParts.join("");
         this.outputCallback(this.partialOutput, false);
         this.lastOutputParts = partialOutputParts;
@@ -434,7 +613,7 @@ class CodeMirrorWrapper extends React.Component<Props, State> {
                     if (cm.somethingSelected()) {
                         return cm.indentSelection('add');
                     } else {
-                        return CodeMirror.commands.insertSoftTab(cm);;
+                        return CodeMirror.commands.insertSoftTab(cm);
                     }
                 }),
                 'Shift-Tab': 'indentLess',
