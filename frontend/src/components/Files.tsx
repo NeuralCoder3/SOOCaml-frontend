@@ -443,7 +443,7 @@ class Files extends React.Component<any, State> {
 
             promise.then((content: string) => {
                 let blob = new Blob([content], {type: 'text/plain;charset=utf-8'});
-                file.name += '.sml';
+                file.name += '.ml';
                 FileSaver.saveAs(blob, file.name);
             });
             evt.stopPropagation();

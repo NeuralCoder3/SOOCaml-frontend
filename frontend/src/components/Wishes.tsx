@@ -411,6 +411,7 @@ class Wishes extends React.Component<any, State> {
                 outputCallback={this.checkWishComplete}
                 onReset={this.handleResetWish}
                 interpreterSettings={curPart.code.interpreterSettings}
+                overwriteFilename={(_) => {return;}}
                 beforeCode={curPart.code.beforeCode === undefined ? undefined :
                     curPart.code.beforeCode.join('')}
                 afterCode={'\n local val _ = printLn "' + TEST_START_STRING + '" in end; local\n'

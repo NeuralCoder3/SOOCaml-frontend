@@ -39,6 +39,7 @@ export interface InterfaceSettings {
     useMobile: boolean;
     hideBeforeCodeResult: boolean;
     wishingHidden: boolean; // wishing interface is hidden until the user opens a wishare link
+    vimMode?: boolean;
 }
 
 export enum FileType {

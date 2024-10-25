@@ -28,3 +28,9 @@
 span.CodeMirror-matchingbracket {
     color: #F4F !important;
 }
+
+.errorMarker {
+    background-color: rgba(255, 95, 95, 0.434);
+    color: #FFF;
+    font-weight: bold;
+}

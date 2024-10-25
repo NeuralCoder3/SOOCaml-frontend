@@ -26,6 +26,7 @@ interface State {
     reset: boolean;
     formContract: boolean;
     interfaceSettings: InterfaceSettings;
+    codemirror: React.RefObject<CodeMirrorWrapper>;
 }
 
 interface Props {
@@ -40,6 +41,9 @@ interface Props {
     interpreterSettings?: InterpreterSettings; // special interpreter settings
     beforeCode?: string; // invisible code that is executed before any user code
     afterCode?: string; // invisible code that is appended to any user code
+
+    setStatusText?: (statusText: string) => void;
+    overwriteFilename: (filename: string) => void;
 }
 
 const SHARE_LINK_ERROR = ':ERROR';
@@ -50,10 +54,12 @@ class Playground extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props);
 
+        let codemirrorWrapper = React.createRef<CodeMirrorWrapper>();
         this.state = {
             reset: false, output: '', code: '', sizeAnchor: 0,
             shareLink: '', formContract: false,
-            interfaceSettings: getInterfaceSettings()
+            interfaceSettings: getInterfaceSettings(),
+            codemirror: codemirrorWrapper
         };
 
         this.clearCodeWindow = this.clearCodeWindow.bind(this);
@@ -68,7 +74,7 @@ class Playground extends React.Component<Props, State> {
         this.modalCloseCallback = this.modalCloseCallback.bind(this);
         this.modalFormContractCallback = this.modalFormContractCallback.bind(this);
         this.modalCreateContractCallback = this.modalCreateContractCallback.bind(this);
-        this.handleBrowserKeyup = this.handleBrowserKeyup.bind(this);
+        this.handleBrowserKeyup = this.handleBrowserKeyup.bind(this, { passive: false });
     }
 
     render() {
@@ -178,14 +184,14 @@ class Playground extends React.Component<Props, State> {
             );
         }
         let resetBtn: JSX.Element | undefined;
-        if (this.props.onReset !== undefined) {
+        // if (this.props.onReset !== undefined) {
             resetBtn = (
                 <Button size="sm" className="button btn-dng-alt"
                     onClick={this.clearCodeWindow}>
-                    <span className="glyphicon glyphicon-repeat" /> Reset
+                    <span className="glyphicon glyphicon-repeat" /> Clear
                 </Button>
             );
-        }
+        // }
 
 
         let style: any = {};
@@ -206,6 +212,7 @@ class Playground extends React.Component<Props, State> {
         let width = (window.innerWidth > 0) ? window.innerWidth : window.screen.width;
         let height = (window.innerHeight > 0) ? window.innerHeight : window.screen.height;
 
+
         let codemirror = (
             <div className="flexcomponent flexy">
                 <MiniWindow content={(
@@ -215,7 +222,10 @@ class Playground extends React.Component<Props, State> {
                         interpreterSettings={this.props.interpreterSettings}
                         beforeCode={this.props.beforeCode}
                         afterCode={this.props.afterCode}
-                        timeout={this.state.interfaceSettings.timeout} />
+                        timeout={this.state.interfaceSettings.timeout} 
+                        setStatusText={this.props.setStatusText}
+                        ref={this.state.codemirror}
+                    />
                 )} header={(
                     <div className="headerButtons">
                         {inputHeadBar}
@@ -319,10 +329,17 @@ class Playground extends React.Component<Props, State> {
 
     handleBrowserKeyup(evt: KeyboardEvent) {
         let newval: boolean = false;
-        if (evt.key === 'Escape') {
-            this.getBodyClassList().remove('fullscreen');
-            newval = false;
-        } else if (evt.key === 'F11') {
+        if(evt.key === 'Escape') {
+            // reject -> do not leave text area
+            evt.preventDefault();
+            evt.stopPropagation();
+            return;
+        }
+        // if (evt.key === 'Escape') {
+        //     this.getBodyClassList().remove('fullscreen');
+        //     newval = false;
+        // } else 
+        if (evt.key === 'F11') {
             // Toggle the fullscreen mode
             if (this.getBodyClassList().contains('fullscreen')) {
                 this.getBodyClassList().remove('fullscreen');
@@ -393,7 +410,16 @@ class Playground extends React.Component<Props, State> {
     }
 
     private clearCodeWindow() {
-        this.setState({ reset: true });
+        // this.setState({ reset: true });
+        // const newCode = '';
+        // this.setState(prevState => {
+        //     return { code: newCode, reset: true};
+        // });
+        // if (this.props.onCodeChange) {
+        //     this.props.onCodeChange(newCode);
+        // }
+        this.state.codemirror.current?.codeMirrorInstance.setValue('');
+        this.props.overwriteFilename('');
         this.render();
         if (this.props.onReset !== undefined) {
             this.props.onReset();

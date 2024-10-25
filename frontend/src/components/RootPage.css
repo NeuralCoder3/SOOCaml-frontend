@@ -4,7 +4,7 @@ html {
     -ms-text-size-adjust: 100%;
 }
 
-article,aside,details,figcaption,figure,footer,header,hgroup,main,menu,nav,section,summary {
+article,aside,details,figcaption,figure,leftfooter,footer,header,hgroup,main,menu,nav,section,summary {
     display: block;
 }
 
@@ -840,11 +840,19 @@ body.fullscreen>div>.rootPage {
     margin-left: 0.4em;
 }
 
+.leftfooter {
+    font-family: monospace;
+    font-size: small;
+    padding-right: 10px;
+    text-align: left;
+}
+
 .footer {
     font-family: monospace;
     font-size: small;
     padding-right: 10px;
     text-align: right;
+    float: right;
 }
 
 body {
@@ -859,6 +867,9 @@ body.fullscreen {
 }
 
 body.fullscreen .footer {
+    display: none;
+}
+body.fullscreen .leftfooter {
     display: none;
 }
 
@@ -943,6 +954,10 @@ a:active,a:hover {
 }
 
 .footer a {
+    font-weight: normal;
+}
+
+.leftfooter a {
     font-weight: normal;
 }
 

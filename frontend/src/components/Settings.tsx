@@ -262,6 +262,15 @@ class Settings extends React.Component<any, State> {
             </div>
         );
         result.push(
+                <div className="checkbox" key="d16">
+                <label>
+            <input type="checkbox" key={15} checked={this.state.front.vimMode}
+                onChange={this.changeHandler('front', 'vimMode')}/>
+                Enable vim mode (experimental)
+                </label>
+            </div>
+        );
+        result.push(
                 <div className="checkbox" key="d12">
                 <label>
             <input type="checkbox" key={12} checked={this.state.inter.showUsedTimeWhenAbove >= 0}

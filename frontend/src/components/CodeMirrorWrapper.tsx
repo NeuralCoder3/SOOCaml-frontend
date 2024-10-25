@@ -1,9 +1,14 @@
 import * as React from 'react';
 import './CodeMirrorWrapper.css';
 import { getInterfaceSettings, InterpreterSettings } from '../storage';
+/* @ts-ignore */
+// import { vim, Vim, getCM } from "@replit/codemirror-vim"
+// import { basicSetup} from 'codemirror';
 
 let CodeMirror: any = require('codemirror');
 
+
+require('codemirror/keymap/vim.js');
 require('codemirror/lib/codemirror.css');
 require('../ocaml.js');
 
@@ -57,7 +62,7 @@ class IncrementalInterpretationHelper {
     lastOutputParts: string[];
     currentlyExecuting: boolean;
     waitingForExecution: boolean;
-    website_cache: {[key: string]: string};
+    website_cache: { [key: string]: string };
 
     constructor(outputCallback: (code: string, complete: boolean) => any,
         settings: string | null,
@@ -156,15 +161,17 @@ class IncrementalInterpretationHelper {
             // TODO: compute url instead of hardcoding
             lookupUrl = "https://cdltools.cs.uni-saarland.de/soocaml/api/code/" + lookupUrl;
         }
-        if(lookupUrl.startsWith("https://cdltools.cs.uni-saarland.de/soocaml/share/")) {
+        if (lookupUrl.startsWith("https://cdltools.cs.uni-saarland.de/soocaml/share/")) {
             lookupUrl = lookupUrl.replace(
-                "https://cdltools.cs.uni-saarland.de/soocaml/share/", 
+                "https://cdltools.cs.uni-saarland.de/soocaml/share/",
                 "https://cdltools.cs.uni-saarland.de/soocaml/api/share/");
         }
         console.log("lookup website", lookupUrl);
         const response = await fetch(lookupUrl);
         const text = await response.text();
-        this.website_cache[url] = text;
+        if (!url.includes("update")) {
+            this.website_cache[url] = text;
+        }
         return text;
     }
 
@@ -173,7 +180,7 @@ class IncrementalInterpretationHelper {
         // replace them with the content of the url
         // do this recursively until no more #url or #use is found
         let new_code = code;
-        
+
         let found = true;
         const patterns = [
             /#url\s*\"(.*)\"/g,
@@ -199,7 +206,7 @@ class IncrementalInterpretationHelper {
     async executeTimeWrapped(code: string): Promise<string[]> {
         if (this.currentlyExecuting) {
             console.log("already executing");
-            return ['','','already executing\n'];
+            return ['', '', 'already executing\n'];
         }
         // run execute(code) in a separate thread and kill it after 5s
         // without worker
@@ -264,13 +271,13 @@ class IncrementalInterpretationHelper {
                 wrapper.currentlyExecuting = false;
                 resolve(['', '', 'timeout\n']);
                 // this.resetExecutor();
-            },this.timeout);
+            }, this.timeout);
             this.exworker.onmessage = (e: any) => {
-                if(finished)
+                if (finished)
                     return;
                 const message = e.data;
                 console.log("exec message", message);
-                if (message.type=="result")  {
+                if (message.type == "result") {
                     if (message.time != current_time) {
                         return;
                     }
@@ -278,7 +285,7 @@ class IncrementalInterpretationHelper {
                     wrapper.currentlyExecuting = false;
                     // TODO: only if time received not < lastExecuted
                     resolve(message.data);
-                }else if (message.type=="error") {
+                } else if (message.type == "error") {
                     finished = true;
                     wrapper.currentlyExecuting = false;
                     // throw message.data;
@@ -323,7 +330,7 @@ class IncrementalInterpretationHelper {
                 resolve(false);
             }, 1000);
             this.exworker.onmessage = (e: any) => {
-                if(e.data.type == "reset") {
+                if (e.data.type == "reset") {
                     console.log("reset done");
                     wrapper.currentlyExecuting = false;
                     resolve(true);
@@ -344,7 +351,7 @@ class IncrementalInterpretationHelper {
         // console.log("handleChangeAt, added: ", added);
 
         const current_time = Date.now();
-        if (current_time - this.lastExecutionTime < this.executionWaitTime 
+        if (current_time - this.lastExecutionTime < this.executionWaitTime
             // || !added.includes(";")) {
             && !added.includes(";")) {
             // console.log("too soon");
@@ -357,7 +364,7 @@ class IncrementalInterpretationHelper {
             }
             return;
         }
-        if(this.currentlyExecuting) {
+        if (this.currentlyExecuting) {
             console.log("already executing");
             if (!this.waitingForExecution) {
                 this.waitingForExecution = true;
@@ -371,7 +378,7 @@ class IncrementalInterpretationHelper {
         this.lastExecutionTime = current_time;
 
 
-        let code = codemirror.getValue().trim();
+        let code = codemirror.getValue();//.trim();
         const commentStart = "(*";
         const commentEnd = "*)";
         const endTag = ";;";
@@ -387,7 +394,7 @@ class IncrementalInterpretationHelper {
         };
 
         // const code_parts = code.split(endTag).filter((x: string) => x !== '');
-        let code_parts : string[] = [];
+        let code_parts: string[] = [];
         // split at ;; but ignore inside (possibly nested) comments
         let current_part = "";
         let comment_level = 0;
@@ -447,6 +454,12 @@ class IncrementalInterpretationHelper {
             this.outputCallback(this.partialOutput, false);
         }
 
+        let errors: {
+            line: number,
+            ch: number,
+            ch_end: number
+        }[] = [];
+        // codemirror.cm.operation(() => {this.clearAllMarkers();});
         for (const part of parts) {
             let response = "";
             let out_response = "";
@@ -485,6 +498,47 @@ class IncrementalInterpretationHelper {
                     err_response = err_response.replace(/Line \d+/g, (match: string) => {
                         return "Line " + (current_line + parseInt(match.split(" ")[1]));
                     });
+                    // const positions = err_response.match(/Line \d+, characters \d+-\d+/g);
+                    // mark position 1, 5 -> 1, 8
+                    // const codeMirrorInstance = codemirror.cm;
+                    // codeMirrorInstance.markText({ line: 0, ch: 0 }, { line: 0, ch: 5 }, {
+                    //     className: "errorMarker",
+                    //     title: "Error",
+                    //     // css: "color: red"
+                    // });
+                    // errors = true;
+                    // codeMirrorInstance.operation(() => {
+                    // // this.clearAllMarkers();
+                    // const positions = err_response.match(/Line (\d+), characters (\d+)-(\d+)/g);
+                    // if (positions !== null) {
+                    //     // console.log("positions", positions);
+                    //     // extract line and character positions as groups
+                    //     const positions_groups = positions.map((x: string) => x.match(/Line (\d+), characters (\d+)-(\d+)/));
+                    //     // console.log("positions_groups", positions_groups);
+                    //     // convert to integers
+                    //     const positions_int = positions_groups.map((x: any) => [parseInt(x[1]), parseInt(x[2]), parseInt(x[3])]);
+                    //     // console.log("positions_int", positions_int);
+                    //     // convert to codemirror positions
+                    //     const positions_cm = positions_int.map((x: any) => {
+                    //         return {
+                    //             line: x[0] - 1,
+                    //             ch: x[1] - 1,
+                    //             ch_end: x[2] - 1
+                    //         };
+                    //     });
+                    //     errors.push(...positions_cm);
+                    //     // console.log("positions_cm", positions_cm);
+                    //     // // mark positions
+                    //     // positions_cm.forEach((x: any) => {
+                    //     //     const marker = codeMirrorInstance.markText({ line: x.line, ch: x.ch }, { line: x.line, ch: x.ch_end }, {
+                    //     //         className: "errorMarker",
+                    //     //         title: "Error"
+                    //     //     });
+                    //     //     this.markers["error"] = marker;
+                    //     // });
+                    // }
+                    // });
+
                 }
                 if (out_response !== "")
                     out_response = "Output: \n" + out_response;
@@ -497,6 +551,35 @@ class IncrementalInterpretationHelper {
             parity = !parity;
             current_line += part.split("\n").length - 1;
         }
+
+
+        const positions = this.partialOutput.match(/Line (\d+), characters (\d+)-(\d+)/g);
+        if (positions !== null) {
+            const positions_groups = positions.map((x: string) => x.match(/Line (\d+), characters (\d+)-(\d+)/));
+            const positions_int = positions_groups.map((x: any) => [parseInt(x[1]), parseInt(x[2]), parseInt(x[3])]);
+            const positions_cm = positions_int.map((x: any) => {
+                return {
+                    line: x[0] - 1,
+                    ch: x[1],
+                    ch_end: x[2]
+                };
+            });
+            errors.push(...positions_cm);
+        }
+
+        // this.clearAllMarkers();
+        console.log("errors", errors);
+        codemirror.cm.operation(() => {
+            this.clearAllMarkers();
+            errors.forEach((x: any) => {
+                const marker = codemirror.cm.markText({ line: x.line, ch: x.ch }, { line: x.line, ch: x.ch_end }, {
+                    className: "errorMarker",
+                    title: "Error"
+                });
+                // this.markers["error"] = marker;
+                this.markers["error" + x.line + x.ch + x.ch_end] = marker;
+            });
+        });
         // console.log(current_line);
         this.partialOutput = partialOutputParts.join("");
         this.outputCallback(this.partialOutput, false);
@@ -556,6 +639,8 @@ export interface Props {
     interpreterSettings?: InterpreterSettings;
     beforeCode?: string;
     afterCode?: string;
+
+    setStatusText?: (statusText: string) => void;
 }
 
 interface State {
@@ -643,6 +728,7 @@ class CodeMirrorWrapper extends React.Component<Props, State> {
     }
 
     componentDidUpdate(prevProps: Props, prevState: any) {
+        // console.log(this.codeMirrorInstance.getCursor());
         if (prevProps.readOnly !== this.props.readOnly) {
             this.codeMirrorInstance.options.readOnly = this.props.readOnly;
             this.codeMirrorInstance.refresh();
@@ -662,6 +748,7 @@ class CodeMirrorWrapper extends React.Component<Props, State> {
 
         const options = {
             lineNumbers: true,
+            // extensions: [vim()],
             mode: 'text/x-ocaml',
             indentUnit: 2,
             smartIndent: autoIndent,
@@ -670,6 +757,8 @@ class CodeMirrorWrapper extends React.Component<Props, State> {
             lineWrapping: true,
             inputStyle: 'contenteditable',
             readOnly: this.props.readOnly ? true : false,
+            // keyMap: 'default',
+            keyMap: getInterfaceSettings().vimMode ? 'vim' : 'default',
             foldGutter: {
                 minFoldSize: 2
             },
@@ -699,6 +788,23 @@ class CodeMirrorWrapper extends React.Component<Props, State> {
                         return CodeMirror.commands.insertSoftTab(cm);
                     }
                 }),
+                // Esc: function(cm:any) {
+                //     if (cm.state.vim.insertMode) {
+                //         CodeMirror.commands.exitInsertMode(cm);
+                //         return true;
+                //     }else {
+                //         return CodeMirror.Pass;
+                //     }
+                // },
+                // left control to exit insert mode
+                // 'Ctrl': function(cm:any) {
+                //     if (cm.state.vim.insertMode) {
+                //         cm.state.vim.handleKey(cm, "<Esc>");
+                //         return true;
+                //     }else {
+                //         return CodeMirror.Pass;
+                //     }
+                // },
                 'Shift-Tab': 'indentLess',
                 'Alt-Tab': 'indentAuto'
             }
@@ -707,7 +813,29 @@ class CodeMirrorWrapper extends React.Component<Props, State> {
         this.codeMirrorInstance = CodeMirror.fromTextArea(this.editor, options);
         this.codeMirrorInstance.on('change', this.handleChangeEvent);
         this.codeMirrorInstance.on('focus', this.focusChanged.bind(this, true));
-        this.codeMirrorInstance.on('blur', this.focusChanged.bind(this, false));
+        // this.codeMirrorInstance.on('blur', this.focusChanged.bind(this, false));
+        // prevent escape from leaving insert mode
+        this.codeMirrorInstance.on('keydown', (cm: any, event: any) => {
+            if (event.key === "Escape") {
+                event.stopPropagation();
+                event.preventDefault();
+            }
+        });
+
+        // print position to console
+        this.codeMirrorInstance.on('cursorActivity', (cm: any) => {
+            // console.log(cm.getCursor());
+            if (this.props.setStatusText) {
+                this.props.setStatusText("Line " + (cm.getCursor().line + 1) + ", Column " + (cm.getCursor().ch + 1));
+            }
+        });
+
+        // import {Vim, getCM} from "@replit/codemirror-vim"
+        // let cm = getCM(this.codeMirrorInstance);
+        // const cm = this.codeMirrorInstance;
+        // use cm to access the old cm5 api
+        // Vim.exitInsertMode(cm)
+        // Vim.handleKey(cm, "<Esc>")
 
         this.evalHelper.clear();
         this.evalHelper.handleChangeAt({ line: 0, ch: 0, sticky: null }, [''], [''],

@@ -15,32 +15,21 @@ import {
     Route
 } from 'react-router-dom';
 import './RootPage.css';
+import Footer from './Footer';
 
 class RootPage extends React.Component<any, any> {
+    constructor(props: any) {
+        super(props);
+        this.state = {
+            statusText: ""
+        };
+    }
+
     render() {
         let settings = getInterfaceSettings();
         let theme = renderTheme(getTheme(settings.theme, settings.autoSelectTheme ?
             settings.darkTheme : undefined));
-        let width = (window.innerWidth > 0) ? window.innerWidth : window.screen.width;
 
-        let footer: any;
-        if (width < 600) {
-            footer = (
-                <div className="footer">
-                    © 2022 <a href="https://github.com/SOSML">The SOSML developers</a> | <a
-                        href="https://www.uni-saarland.de/footer/dialog/impressum.html">Imprint</a>
-                </div>
-            );
-        } else {
-            footer = (
-                <div className="footer">
-                    © 2022 <a href="https://github.com/SOSML">The SOSML Developers</a> | <a
-                        href="https://github.com/NeuralCoder3/SOOCaml-frontend">Sources on GitHub</a> | <a
-                            href="https://github.com/NeuralCoder3/SOOCaml-frontend/issues/new">File a Bug</a> | <a
-                                href="https://www.uni-saarland.de/impressum">Imprint</a>
-                </div>
-            );
-        }
 
         let wishes: any;
         if (!wishingHidden()) {
@@ -53,6 +42,10 @@ class RootPage extends React.Component<any, any> {
             );
         }
 
+        const setStatusTextWrapper = (statusText: string) => {
+            this.setState({ statusText: statusText });
+        };
+
         return (
             // <Router basename={ROUTE_BASENAME}>
             // TODO: handle using webpack
@@ -62,7 +55,8 @@ class RootPage extends React.Component<any, any> {
                     <style>{theme}</style>
                     <MenuBar />
                     <Route exact={true} path="/" component={Landing} />
-                    <Route path="/editor" component={Editor} />
+                    {/* <Route path="/editor" component={Editor} setStatusText={(statusText: string) => this.setState({ statusText: statusText })} /> */}
+                    <Route path="/editor" render={(props) => <Editor {...props} setStatusText={setStatusTextWrapper} />} />
                     <Route path="/files" component={Files} />
                     <Route path="/help" component={Landing} />
                     <Route path="/settings" component={Settings} />
@@ -71,7 +65,7 @@ class RootPage extends React.Component<any, any> {
                     <Route path="/examplefile/:name" component={FileIntermediate} />
                     <Route path="/share/:hash" component={Editor} />
                     <Route path="/wishare/:hash" component={Wishes} />
-                    {footer}
+                    <Footer statusText={this.state.statusText} />
                 </div>
             </Router >
         );

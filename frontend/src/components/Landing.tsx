@@ -133,13 +133,23 @@ class Landing extends React.Component<any, any> {
                     </pre>
 
                     There is a special load directive to load OCaml files from the internet.
+
                     <pre>
+                        (* Github file *)
+                        <br />
                         #url "https://raw.githubusercontent.com/avsm/hello-world-action-ocaml/master/hello.ml";;
-                    </pre>
-                    will load the file hello.ml from github and evaluate it.
-                    Shared files need the api url
-                    <pre>
-                        #url "https://cdltools.cs.uni-saarland.de/soocaml/api/share/[longnumberchain]";;
+                        <br />
+                        (* Hedgedoc file *)
+                        <br />
+                        #use "https://sonic.cs.uni-saarland.de/s/J9Ipcp1ZV/download";;
+                        <br />
+                        (* Example file *)
+                        <br />
+                        #use "bignum.ml";;
+                        <br />
+                        (* Shared file *)
+                        <br />
+                        #use "https://cdltools.cs.uni-saarland.de/soocaml/share/13abb8571c0c78f4e2b40b5a11cae27fdfc2792eddaefc5c7c2e74fce417a577";;
                     </pre>
                 </div>
 

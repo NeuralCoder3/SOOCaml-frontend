@@ -34,6 +34,8 @@ class Editor extends React.Component<any, State> {
     constructor(props: any) {
         super(props);
 
+        console.log(props);
+
         let width = (window.innerWidth > 0) ? window.innerWidth : window.screen.width;
         let height = (window.innerHeight > 0) ? window.innerHeight : window.screen.height;
         this.state = {
@@ -312,7 +314,10 @@ class Editor extends React.Component<any, State> {
                 {topBar}
                 <Playground readOnly={this.state.shareReadMode} onCodeChange={this.handleCodeChange}
                     onResize={this.onResize} initialCode={this.state.initialCode}
-                    fileControls={fileForm} />
+                    fileControls={fileForm} 
+                    setStatusText={this.props.setStatusText}
+                    overwriteFilename={(filename: string) => this.setState({ fileName: filename })}
+                />
             </div>
         );
     }
