@@ -15,7 +15,9 @@ import {
 } from '../storage';
 import { SHARING_ENABLED } from '../config';
 import { PPMImage } from './PPMImage';
+import isSvg from 'is-svg';
 
+import DOMPurify from 'dompurify';
 
 interface State {
     output: string;
@@ -49,6 +51,12 @@ interface Props {
 const SHARE_LINK_ERROR = ':ERROR';
 const SHARE_LINK_ERROR_NO_CONTRACT = ':ERROR_CONTRACT';
 const OUTPUT_MARKUP_SPECIALS = ['\\*', '\\_'];
+
+function sanitizeSVG(svgString : string) : string {
+    const cleanSVG = DOMPurify.sanitize(svgString, { USE_PROFILES: { svg: true } });
+
+    return cleanSVG;
+}
 
 class Playground extends React.Component<Props, State> {
     constructor(props: Props) {
@@ -113,8 +121,14 @@ class Playground extends React.Component<Props, State> {
         var key = 0;
         var markingColor = 0;
         let image_lines = [];
+        let svg_lines = [];
         let in_image = false;
+        let in_svg = false;
         for (const line of lines) {
+            if (in_svg && line !== "END_SVG") {
+                svg_lines.push(line);
+                continue;
+            }
             if (in_image && line !== "END_IMAGE") {
                 image_lines.push(line);
                 continue;
@@ -126,8 +140,25 @@ class Playground extends React.Component<Props, State> {
                 image_lines = [];
                 continue;
             }
+            if (in_svg && line === "END_SVG") {
+                in_svg = false;
+                const svg_str = svg_lines.join('\n');
+                let svg;
+                if (isSvg(svg_str)) {
+                    svg = <div dangerouslySetInnerHTML={{ __html: sanitizeSVG(svg_str) }} key={line + (key++)} />;
+                }else {
+                    svg = <pre key={line + (key++)}>Invalid svg: {svg_str}</pre>;
+                }
+                lineItems.push(svg);
+                svg_lines = [];
+                continue;
+            }
             if (line === "IMAGE") {
                 in_image = true;
+                continue;
+            }
+            if (line === "START_SVG") {
+                in_svg = true;
                 continue;
             }
             let data: [JSX.Element, number, number] = this.parseLine(line, key++, markingColor);

@@ -62,7 +62,7 @@ class IncrementalInterpretationHelper {
     lastOutputParts: string[];
     currentlyExecuting: boolean;
     waitingForExecution: boolean;
-    website_cache: { [key: string]: string };
+    website_cache: {[key: string]: string};
 
     constructor(outputCallback: (code: string, complete: boolean) => any,
         settings: string | null,
@@ -190,7 +190,15 @@ class IncrementalInterpretationHelper {
             found = false;
             for (const pattern of patterns) {
                 let matches = new_code.matchAll(pattern);
-                for (const match of matches) {
+                let match_array = Array.from(matches);
+                for (let i = 0; i < match_array.length; i++) {
+                    let match = match_array[i];
+                // for (const match of matches) {
+                // while (true) {
+                //     const match = matches.next();
+                //     if (match.done) {
+                //         break;
+                //     }
                     found = true;
                     const url = match[1];
                     const replacement = await this.lookupWebsite(url);

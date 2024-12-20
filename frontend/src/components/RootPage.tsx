@@ -30,6 +30,26 @@ class RootPage extends React.Component<any, any> {
         let theme = renderTheme(getTheme(settings.theme, settings.autoSelectTheme ?
             settings.darkTheme : undefined));
 
+	/*
+        let footer: any;
+        if (width < 600) {
+            footer = (
+                <div className="footer">
+                    © 2022 <a href="https://github.com/SOSML">The SOSML developers</a> | <a
+                        href="https://www.uni-saarland.de/footer/dialog/impressum.html">Imprint</a>
+                </div>
+            );
+        } else {
+            footer = (
+                <div className="footer">
+                    © 2022 <a href="https://github.com/SOSML">The SOSML Developers</a> | <a
+                        href="https://github.com/NeuralCoder3/SOOCaml-frontend">Sources on GitHub</a> | <a
+                            href="https://github.com/NeuralCoder3/SOOCaml-frontend/issues/new">File a Bug</a> | <a
+                                href="https://www.uni-saarland.de/impressum">Imprint</a>
+                </div>
+            );
+        }
+	*/
 
         let wishes: any;
         if (!wishingHidden()) {
