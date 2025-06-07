@@ -10,6 +10,7 @@ import {
 } from '../storage';
 import './Editor.css';
 import { PIPELINE_ID } from './Version';
+import { decompress } from 'lzw-compressor';
 
 const FEEDBACK_NONE = 0;
 const FEEDBACK_SUCCESS = 1;
@@ -28,6 +29,31 @@ interface State {
     error: string;
     width: number;
     requiredVersion: number;
+}
+
+
+
+function parseGivenCode(code: string): string {
+    // if base64(zip (lzw) compressed) code (check if decryptable), decode it, else use it as is
+    if (code.startsWith("lzw:")) {
+        const encoded = code.substring(4);
+        try {
+            const decodedBuffer = Buffer.from(encoded, 'base64');
+            let decodedStr = '';
+            for (let i = 0; i < decodedBuffer.length; i += 2) {
+            decodedStr += String.fromCharCode(
+                (decodedBuffer[i] << 8) + decodedBuffer[i + 1]
+            );
+            }
+
+            const text = decompress(decodedStr);
+            return text;
+        } catch (e) {
+            return code;
+        }
+    } else {
+        return code;
+    }
 }
 
 class Editor extends React.Component<any, State> {
@@ -82,7 +108,7 @@ class Editor extends React.Component<any, State> {
                     let dfn = decodeURIComponent(parts[i].substr("code=".length));
                     this.setState((oldState) => {
                         return {
-                            initialCode: dfn
+                            initialCode: parseGivenCode(dfn)
                         };
                     });
                     return;
@@ -105,7 +131,7 @@ class Editor extends React.Component<any, State> {
             }).then((content: string) => {
                 this.setState((oldState) => {
                     return {
-                        initialCode: content, fileName: dfn,
+                        initialCode: parseGivenCode(content), fileName: dfn,
                         requiredVersion: this.extractVersion(content)
                     };
                 });
@@ -122,7 +148,7 @@ class Editor extends React.Component<any, State> {
                     let dfn = decodeURIComponent(parts[i].substr("code=".length));
                     this.setState((oldState) => {
                         return {
-                            initialCode: dfn
+                            initialCode: parseGivenCode(dfn)
                         };
                     });
                     return;
@@ -146,7 +172,7 @@ class Editor extends React.Component<any, State> {
                 promise.then((content: string) => {
                     this.setState((oldState) => {
                         return {
-                            initialCode: content, fileName: state.fileName,
+                            initialCode: parseGivenCode(content), fileName: state.fileName,
                             shareReadMode: state.shareReadMode,
                             shareHash: state.shareReadMode ? state.fileName : undefined,
                             requiredVersion: this.extractVersion(content)
@@ -160,7 +186,7 @@ class Editor extends React.Component<any, State> {
                 }).then((content: string) => {
                     this.setState((oldState) => {
                         return {
-                            initialCode: content, fileName: state.shareHash,
+                            initialCode: parseGivenCode(content), fileName: state.shareHash,
                             shareReadMode: false, requiredVersion: this.extractVersion(content)
                         };
                     });
@@ -168,7 +194,7 @@ class Editor extends React.Component<any, State> {
                     API.loadSharedCode(state.shareHash).then((content: string) => {
                         this.setState((oldState) => {
                             return {
-                                initialCode: content,
+                                initialCode: parseGivenCode(content),
                                 requiredVersion: this.extractVersion(content)
                             };
                         });
@@ -193,7 +219,7 @@ class Editor extends React.Component<any, State> {
             }).then((content: string) => {
                 this.setState((oldState) => {
                     return {
-                        initialCode: content, shareReadMode: true, shareHash: shareName,
+                        initialCode: parseGivenCode(content), shareReadMode: true, shareHash: shareName,
                         requiredVersion: this.extractVersion(content)
                     };
                 });
@@ -201,7 +227,7 @@ class Editor extends React.Component<any, State> {
                 API.loadSharedCode(shareName).then((content: string) => {
                     this.setState((oldState) => {
                         return {
-                            initialCode: content, shareReadMode: true, shareHash: shareName,
+                            initialCode: parseGivenCode(content), shareReadMode: true, shareHash: shareName,
                             requiredVersion: this.extractVersion(content)
                         };
                     });
@@ -234,7 +260,7 @@ class Editor extends React.Component<any, State> {
             }).then((content: string) => {
                 this.setState((oldState) => {
                     return {
-                        initialCode: content, fileName: fileName,
+                        initialCode: parseGivenCode(content), fileName: fileName,
                         requiredVersion: this.extractVersion(content)
                     };
                 });
@@ -385,7 +411,7 @@ class Editor extends React.Component<any, State> {
     onResize() {
         if (this.state.shareHash === undefined) {
             this.setState(prevState => {
-                return { initialCode: prevState.code };
+                return { initialCode: parseGivenCode(prevState.code) };
             });
         }
         let width = (window.innerWidth > 0) ? window.innerWidth : window.screen.width;
