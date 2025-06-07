@@ -264,9 +264,11 @@ class Settings extends React.Component<any, State> {
         result.push(
                 <div className="checkbox" key="d16">
                 <label>
-            <input type="checkbox" key={15} checked={this.state.front.vimMode}
+            <input type="checkbox" key={16} checked={
+                ("vimMode" in this.state.front) ? (this.state.front.vimMode as boolean) : false
+            }
                 onChange={this.changeHandler('front', 'vimMode')}/>
-                Enable vim mode (experimental)
+                Enable vimMode
                 </label>
             </div>
         );
