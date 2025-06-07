@@ -60,6 +60,7 @@ class IncrementalInterpretationHelper {
     afterExtraCode: string | undefined; // Code to be executed after any user code
     lastExecutedCodeParts: string[];
     lastOutputParts: string[];
+    statemap: { [key: string]: any };
     currentlyExecuting: boolean;
     waitingForExecution: boolean;
     website_cache: { [key: string]: string };
@@ -89,6 +90,7 @@ class IncrementalInterpretationHelper {
         this.lastExecutionTime = 0;
         this.lastExecutedCodeParts = [];
         this.lastOutputParts = [];
+        this.statemap = {};
     }
 
     setTimeout(num: number) {
@@ -343,6 +345,53 @@ class IncrementalInterpretationHelper {
         return p;
     }
 
+    async setState(state:any) {
+        this.currentlyExecuting = true;
+        const wrapper = this;
+        console.log("invoke setting state", this.exworker);
+        const p = new Promise<boolean>((resolve, reject) => {
+            setTimeout(() => {
+                wrapper.currentlyExecuting = false;
+                resolve(false);
+            }, 1000);
+            this.exworker.onmessage = (e: any) => {
+                if (e.data.type == "setState") {
+                    console.log("set done");
+                    wrapper.currentlyExecuting = false;
+                    resolve(true);
+                }
+            }
+            this.exworker.postMessage({
+                type: 'setState',
+                data: state
+            });
+        });
+        return p;
+    }
+
+    async getState() {
+        this.currentlyExecuting = true;
+        const wrapper = this;
+        console.log("invoke getting state", this.exworker);
+        const p = new Promise<any>((resolve, reject) => {
+            setTimeout(() => {
+                wrapper.currentlyExecuting = false;
+                resolve(null);
+            }, 1000);
+            this.exworker.onmessage = (e: any) => {
+                if (e.data.type == "getState") {
+                    console.log("get done");
+                    wrapper.currentlyExecuting = false;
+                    resolve(e.data.data);
+                }
+            }
+            this.exworker.postMessage({
+                type: 'getState',
+            });
+        });
+        return p;
+    }
+
     async handleChangeAt(pos: any, added: string[], removed: string[], codemirror: CodeMirrorSubset) {
         if (this.disabled) {
             return;
@@ -430,7 +479,15 @@ class IncrementalInterpretationHelper {
             // resetInterpreter();
             await this.resetExecutor();
             console.log("finished reset");
+        } else {
+            const common_string = last_parts.slice(0, common_code_length).join("");
+            console.log("lookup state for common string", common_string);
+            if (this.statemap[common_string] !== undefined && this.statemap[common_string] !== null) {
+                await this.setState(this.statemap[common_string]);
+                console.log("set state for common string", this.statemap[common_string], common_string);
+            }
         }
+
         // console.log("common code parts", common_code_length);
         // console.log("last code parts", last_parts.length);
         // console.log("new code parts", code_parts.length - common_code_length);
@@ -550,6 +607,14 @@ class IncrementalInterpretationHelper {
             this.outputCallback(this.partialOutput, false);
             parity = !parity;
             current_line += part.split("\n").length - 1;
+        }
+
+        const new_state = await this.getState();
+        console.log("new state retrieved", new_state);
+        const current_str = this.lastExecutedCodeParts.join("");
+        if (this.statemap[current_str] === undefined && new_state !== null && current_str.length > 0) {
+            console.log("Writing state for ", current_str);
+            this.statemap[current_str] = new_state;
         }
 
 
